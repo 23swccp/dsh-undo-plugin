@@ -1,8 +1,10 @@
-# dsh-rollback-plugin
+# dsh-undo-plugin
 
 [English](README.md) | 中文
 
-[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(`dsh`)的对话回滚与归档任务管理插件,以**可安装的插件 bundle** 形式交付——独立工作区,不打补丁、不修改 dsh 本体,只使用 npm 上发布的 dsh 公开 API(`@deepseek-ai/dsh-*@0.1.0-rc.6`)。
+[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(`dsh`)的对话撤销与归档任务管理插件,以**可安装的插件 bundle** 形式交付——独立工作区,不打补丁、不修改 dsh 本体,只使用 npm 上发布的 dsh 公开 API(`@deepseek-ai/dsh-*@0.1.0-rc.6`)。
+
+> **注:**仓库与各包沿用历史名 `rollback`;面向用户的命令是 `/undo`(撤销最近一条已完成消息)与 `/update`(自更新)。
 
 ## 功能
 

@@ -1,8 +1,10 @@
-# dsh-rollback-plugin
+# dsh-undo-plugin
 
 English | [中文](README.zh.md)
 
-Conversation rollback and archive-task management for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`), delivered as an **installable plugin bundle** — a standalone workspace that never patches the dsh codebase and uses only the public dsh APIs published on npm (`@deepseek-ai/dsh-*@0.1.0-rc.6`).
+Conversation undo and archive-task management for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`), delivered as an **installable plugin bundle** — a standalone workspace that never patches the dsh codebase and uses only the public dsh APIs published on npm (`@deepseek-ai/dsh-*@0.1.0-rc.6`).
+
+> **Note:** the repository and the packages keep the historical `rollback` name; the user-facing commands are `/undo` (revert the latest completed message) and `/update` (self-update).
 
 ## Features
 
