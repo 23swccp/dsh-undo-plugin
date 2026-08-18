@@ -1,0 +1,38 @@
+# The dsh-rollback-plugin bundle patch: conversation rollback + archive tasks
+# as installable plugin rows. Applied after the target profile's base bundle;
+# rows here insert new plugin entries. `dshHomePath` is the host-side
+# expression the dsh boot injects for application-data roots.
+#
+# Headless profiles may drop the two `client-rollback-*` rows (they require
+# the dsh-web-app browser surface).
+- insert:
+    - id: rollback-fork
+      name: '@dsh-rollback/rollback-fork'
+
+    - id: rollback-archive
+      name: '@dsh-rollback/rollback-archive'
+      config:
+        root: !!js dshHomePath('rollback-archive')
+
+    - id: rollback-undo
+      name: '@dsh-rollback/rollback-undo'
+      config:
+        root: !!js dshHomePath('rollback-undo')
+
+    - id: client-rollback-button
+      name: '@dsh-rollback/client-rollback-button'
+
+    - id: client-rollback-settings
+      name: '@dsh-rollback/client-rollback-settings'
+
+# The base web-app bundle also ships ui-settings-archive and session-archive,
+# whose sessionArchive Remote contributions claim the namespace first and block
+# this bundle's tombstone/untombstone/restore/delete endpoints from mounting
+# client-side. Disable both so the rollback archive surface owns the namespace.
+- id: ui-settings-archive
+  name: '@deepseek-ai/dsh-client-ui-settings-archive'
+  disabled: true
+
+- id: session-archive
+  name: '@deepseek-ai/dsh-session-archive'
+  disabled: true

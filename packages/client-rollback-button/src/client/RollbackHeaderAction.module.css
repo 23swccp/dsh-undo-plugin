@@ -1,0 +1,17 @@
+.action {
+  border: 0;
+  background: transparent;
+  color: var(--dsw-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  padding: 4px 6px;
+}
+
+.action:hover:not(:disabled) {
+  color: var(--dsw-text-primary);
+}
+
+.action:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

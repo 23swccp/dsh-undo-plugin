@@ -1,0 +1,19 @@
+{
+  // Host aggregate: host-side packages (rollback-fork, rollback-archive,
+  // rollback-undo) plus their tests. The client aggregate owns the browser
+  // packages; the two faces merge cordis Context under the same keys, so one
+  // program cannot see both.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rewriteRelativeImportExtensions": false
+  },
+  "include": ["packages/*/src/**/*.ts", "packages/*/tests/**/*.ts"],
+  "exclude": ["packages/client-rollback-*/**"],
+  "references": [
+    { "path": "./packages/typert-protocol" },
+    { "path": "./packages/rollback-fork" },
+    { "path": "./packages/rollback-archive" },
+    { "path": "./packages/rollback-undo" }
+  ]
+}

@@ -1,0 +1,80 @@
+.fold {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* Ride the composer width axis declared on the conversation root: same cap
+     and same side clearance as the input card, so the strip's border box
+     matches the card's border box at every viewport. */
+  box-sizing: border-box;
+  width: calc(100% - 2 * var(--dsh-composer-side-clearance, 16px));
+  max-width: var(--dsh-composer-card-max-width, 780px);
+  margin: 0 auto;
+  padding: 6px 10px;
+  border: 1px solid var(--dsw-border-subtle, var(--dsw-divider, rgba(128, 128, 128, 0.35)));
+  border-radius: 8px;
+  background: var(--dsw-bg-elevated, rgba(128, 128, 128, 0.08));
+  color: var(--dsw-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.label {
+  flex: none;
+  color: var(--dsw-text-primary);
+  white-space: nowrap;
+}
+
+.preview {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.preview.expanded {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.toggle {
+  flex: none;
+  color: var(--dsw-text-tertiary, var(--dsw-text-secondary));
+  font-size: 12px;
+}
+
+.undo {
+  flex: none;
+  border: 0;
+  border-radius: 6px;
+  background: var(--dsw-bg-raised, rgba(128, 128, 128, 0.18));
+  color: var(--dsw-text-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  padding: 3px 10px;
+}
+
+.undo:hover:not(:disabled) {
+  background: var(--dsw-bg-raised-hover, rgba(128, 128, 128, 0.28));
+}
+
+.undo:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

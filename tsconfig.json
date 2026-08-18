@@ -1,0 +1,5 @@
+{
+  // Root solution: type-checks and builds both aggregates.
+  "files": [],
+  "references": [{ "path": "./tsconfig.host.json" }, { "path": "./tsconfig.client.json" }]
+}

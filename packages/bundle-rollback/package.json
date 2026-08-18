@@ -1,0 +1,21 @@
+{
+  "name": "@dsh-rollback/bundle-rollback",
+  "description": "Installable dsh bundle: conversation rollback and archive tasks",
+  "version": "0.1.0-rc.6",
+  "private": true,
+  "type": "module",
+  "files": ["cordis.patch.yml"],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@dsh-rollback/client-rollback-button": "^0.1.0-rc.6",
+    "@dsh-rollback/client-rollback-settings": "^0.1.0-rc.6",
+    "@dsh-rollback/rollback-archive": "^0.1.0-rc.6",
+    "@dsh-rollback/rollback-fork": "^0.1.0-rc.6",
+    "@dsh-rollback/rollback-undo": "^0.1.0-rc.6"
+  }
+}

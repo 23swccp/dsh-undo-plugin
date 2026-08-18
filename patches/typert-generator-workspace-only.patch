@@ -1,0 +1,13 @@
+﻿diff --git a/lib/types/analyzer.js b/lib/types/analyzer.js
+--- a/lib/types/analyzer.js
++++ b/lib/types/analyzer.js
+@@ -1135,6 +1135,9 @@ class FaceAnalyzer {
+     typeMetaMapMembers(name) {
+         const result = [];
+         for (const sourceFile of this.program.getSourceFiles()) {
++            // npm-resolved dsh twins declare the same typert maps; only the
++            // workspace owns generation, so scan workspace-registered files only.
++            if (this.registrationForFile(sourceFile.fileName) === undefined) continue;
+             for (const statement of sourceFile.statements) {
+                 if (!ts.isModuleDeclaration(statement)
+                     || !ts.isStringLiteral(statement.name)

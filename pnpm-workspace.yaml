@@ -1,0 +1,22 @@
+packages:
+  - 'packages/*'
+allowBuilds:
+  esbuild: true
+  koffi: true
+# Every dsh package must resolve @deepseek-ai/dsh-typert-protocol to this
+# workspace copy: the typert generator recognizes Remote/TypertRemoteService
+# only when that package is workspace-registered, and a registry twin would
+# duplicate typert map declarations in the analyzed program.
+overrides:
+  '@deepseek-ai/dsh-typert-protocol': workspace:^
+  # Internal packages declare real version ranges in their manifests (so an
+  # installed copy resolves from a registry/links); this workspace still links
+  # them to the local sources during development.
+  '@dsh-rollback/rollback-fork': workspace:^
+  '@dsh-rollback/rollback-archive': workspace:^
+  '@dsh-rollback/rollback-undo': workspace:^
+  '@dsh-rollback/client-rollback-button': workspace:^
+  '@dsh-rollback/client-rollback-settings': workspace:^
+patchedDependencies:
+  '@deepseek-ai/dsh-typert-generator@0.1.0-rc.6':
+    patches/typert-generator-workspace-only.patch

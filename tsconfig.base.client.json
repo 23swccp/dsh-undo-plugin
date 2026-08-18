@@ -1,0 +1,9 @@
+{
+  // Browser-half base: React JSX plus the shared strict options. Client
+  // packages and the client aggregate extend this.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["es2024", "dom", "dom.iterable"]
+  }
+}

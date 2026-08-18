@@ -1,0 +1,34 @@
+{
+    "name": "dsh-rollback-plugin",
+    "version": "0.1.0-rc.6",
+    "private": true,
+    "type": "module",
+    "packageManager": "pnpm@11.7.0",
+    "engines": {
+        "node": "^22.19.0 || >=24.0.0"
+    },
+    "scripts": {
+        "typecheck": "npm run build:lib:host && tsc -b tsconfig.client.json",
+        "test": "vitest run",
+        "build": "npm run build:lib:host && npm run build:lib:client",
+        "build:lib:host": "tsc -b tsconfig.host.json && tsdown --env.DSH_BUILD_FACE host",
+        "build:lib:client": "tsc -b tsconfig.client.json && tsdown --env.DSH_BUILD_FACE client"
+    },
+    "devDependencies": {
+        "@deepseek-ai/cordis": "^4.0.1",
+        "@deepseek-ai/dsh-typert-generator": "^0.1.0-rc.6",
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/react": "^16.3.2",
+        "@types/node": "^22.20.0",
+        "@types/react": "~18.3.1",
+        "jsdom": "29.1.1",
+        "lightningcss": "^1.32.0",
+        "puppeteer-core": "^25.7.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tsdown": "^0.22.2",
+        "tsx": "^4.22.4",
+        "typescript": "^6.0.3",
+        "vitest": "^4.1.8"
+    }
+}
