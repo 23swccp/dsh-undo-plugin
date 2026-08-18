@@ -31,6 +31,10 @@ After a rollback, a strip above the composer shows `↩ 已回滚 <prompt previe
 - **Delete**: permanently removes the session's on-disk log directory; busy agents are cancelled and awaited idle first.
 - **Delete all**: one batch RPC with a double-confirm dialog; partial failures report "deleted X, Y failed".
 
+### Self-update
+
+`/update` in any session pulls the latest source (`--ff-only`, local commits are never rewritten), reinstalls dependencies, and rebuilds the plugin in one pass; restart dsh to activate. There is no background auto-update — updating always starts from an explicit user action.
+
 ### Performance
 
 Measured on a ~7,400-file workspace (before → after):
@@ -108,4 +112,4 @@ The typert generator recognizes `Remote` / `TypertRemoteService` only when the d
 
 ## License
 
-MIT
+[MIT](LICENSE)

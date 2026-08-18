@@ -3,6 +3,15 @@
     "version": "0.1.0-rc.6",
     "private": true,
     "type": "module",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/23swccp/dsh-rollback-plugin.git"
+    },
+    "bugs": {
+        "url": "https://github.com/23swccp/dsh-rollback-plugin/issues"
+    },
+    "homepage": "https://github.com/23swccp/dsh-rollback-plugin#readme",
     "packageManager": "pnpm@11.7.0",
     "engines": {
         "node": "^22.19.0 || >=24.0.0"
