@@ -27,6 +27,7 @@ import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type {} from '@deepseek-ai/dsh-workspace'
 import { assertSupportedWorkspace, dataComponent, readJson, ShadowGit, writeJson } from './shadow-git.ts'
 import { conversationUndoJournalSchema } from './spec.ts'
+import { performPluginUpdate, pluginWorkspaceRoot } from './update.ts'
 import type {
   ConversationAdmissionFailureRequest, ConversationAdmissionFailureValue, ConversationArchiveActionRequest,
   ConversationArchiveActionValue, ConversationCurrentRequest, ConversationRevokePairRequest,
@@ -114,6 +115,26 @@ export class ConversationUndoService extends TypertRemoteService {
       description: '回滚最近一条已完成消息:恢复文件和对话到该消息之前',
       handler: invocation => this.rollbackCommand(invocation),
     })
+    this.ctx.commands.register({
+      name: 'update',
+      description: '更新 dsh-rollback-plugin:拉取最新代码并重新构建(重启 dsh 后生效)',
+      handler: invocation => this.updateCommand(invocation),
+    })
+  }
+
+  /** Execute `/update`: pull, install, and rebuild this plugin's own workspace.
+   * @param invocation - command invocation; no arguments are accepted.
+   * @returns A human-facing summary or failure.
+   */
+  private async updateCommand(invocation: CommandInvocation): Promise<CommandResult> {
+    if (invocation.rawInput.trim().length > 0) {
+      return { kind: 'error', text: '更新 dsh-rollback-plugin:拉取最新代码并重新构建(重启 dsh 后生效)' }
+    }
+    try {
+      return { kind: 'success', text: await performPluginUpdate(pluginWorkspaceRoot()) }
+    } catch (error) {
+      return { kind: 'error', text: error instanceof Error ? error.message : String(error) }
+    }
   }
 
   /** Execute `/undo` for the receiving agent's latest completed message.

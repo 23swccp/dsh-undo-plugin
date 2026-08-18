@@ -71,21 +71,25 @@ Windows note: `link:` installs from a path containing spaces get split by pnpm �
 
 ## Updating an existing installation
 
-There is no background auto-update; the plugin loads the built `lib/` from your local clone. After pulling changes:
+Run the `/update` command in any session (requires a git clone of this repository): it executes `git pull --ff-only` → `pnpm install` → `pnpm run build` with per-step timeouts, reports "already up to date" when HEAD did not move, and skips install/build in that case. Restart dsh afterwards — link-installed profiles pick up the rebuilt `lib/` automatically.
+
+Manual equivalent:
 
 ```sh
 git pull
 pnpm install        # only needed when dependencies changed
 pnpm run build
-# restart dsh — link-installed profiles pick up the rebuilt lib automatically
+# restart dsh
 ```
+
+There is no background auto-update; updating always starts from an explicit user action.
 
 ## Development
 
 ```sh
 pnpm install
 pnpm run typecheck   # builds host artifacts (typert generation) then checks the client face
-pnpm test            # vitest, 7 files / 31 tests
+pnpm test            # vitest, 8 files / 35 tests
 pnpm run build       # host lib + client bundles (lib/client.js)
 ```
 

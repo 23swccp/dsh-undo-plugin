@@ -71,21 +71,25 @@ Windows 注意:从含空格的路径以 `link:` 安装会被 pnpm 拆分——�
 
 ## 更新已安装的插件
 
-没有后台自动更新;插件加载的是本地 clone 里构建出的 `lib/`。拉取更新后:
+在任意会话运行 `/update` 命令(要求本插件以 git clone 方式安装):自动执行 `git pull --ff-only` → `pnpm install` → `pnpm run build`(分步超时保护);HEAD 没有移动时报告"已是最新"并跳过安装构建。完成后重启 dsh——link 安装的 profile 自动使用重建后的 `lib/`。
+
+手动等价操作:
 
 ```sh
 git pull
 pnpm install        # 仅依赖变化时需要
 pnpm run build
-# 重启 dsh —— link 安装的 profile 自动使用重建后的 lib
+# 重启 dsh
 ```
+
+没有后台自动更新;更新永远由用户显式发起。
 
 ## 开发
 
 ```sh
 pnpm install
 pnpm run typecheck   # 先构建 host 产物(typert 生成),再检查 client 面
-pnpm test            # vitest,7 个文件 / 31 个用例
+pnpm test            # vitest,8 个文件 / 35 个用例
 pnpm run build       # host lib + client bundle(lib/client.js)
 ```
 

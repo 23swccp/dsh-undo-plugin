@@ -388,3 +388,20 @@ statWarmer、prearm)只做在本插件;web profile 实际运行的**主树
 - **验证**:两份 tsc 通过;插件 31 单测全绿;主树 6 单测全绿;重启后浏览器
   实测(主树路径,7400+ 文件工作区):**回滚 1169ms、撤回回滚 653ms**
   (本插件时代最优 2.1s/3.2-6.7s)。状态转换与恢复语义全部正常。
+
+## 2026-08-18 会话:`/update` 自更新命令
+
+rollback-undo 新增 `/update` host 命令(与 `/undo` 同一注册点),一键更新
+本插件安装:`git pull --ff-only` → `pnpm install` → `pnpm run build`,全部
+经 shell spawn(Windows 解析 pnpm.cmd),分步超时 30s/120s/300s/600s,
+超时 kill。HEAD 未移动时报告"已是最新(短哈希)"并跳过安装构建;任一步
+失败返回带该步 stderr 的错误文案,提示手动执行的等价命令。更新后仍需重启
+dsh(link 安装加载的是构建产物 lib/,重启后生效)。
+
+- 工作区根由 `pluginWorkspaceRoot()` 从模块路径三级向上定位并校验
+  `pnpm-workspace.yaml` 存在(src 与 lib 两种布局均成立,防布局变化静默
+  错根)。
+- 新增 `tests/update.spec.ts`(真实临时 git 仓库:克隆源+克隆):up-to-date
+  不动 / 上游前进 HEAD 跟进 / 分叉克隆被 `--ff-only` 拒绝(不改写用户本地
+  提交)。pluginWorkspaceRoot 在本仓库真实布局上断言成立。
+- 命令无后台自动更新;永远由用户显式发起,拒绝带参调用(返回用法文案)。
