@@ -10,7 +10,7 @@
 
 插件以**可安装 bundle** 形式交付:独立工作区、不打补丁、不修改 dsh 本体,只使用 npm 上发布的 dsh 公开 API(`@deepseek-ai/dsh-*@0.1.0-rc.6`)。文件回滚走插件私有的 Shadow Git 快照(独立 `GIT_DIR`,绝不碰你的 `.git`)。
 
-> **注:** 仓库与各包沿用历史名 `rollback`;面向用户的命令是 `/undo`(撤销)与 `/update`(自更新)。
+
 
 ## 具体功能
 
