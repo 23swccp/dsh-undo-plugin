@@ -474,3 +474,23 @@ shell 解析 pnpm、原子写按错误码比较重试);仅两处 Windows-only,�
   profile 层)。
 - 顺带:profile 里五个指向已删 junction 的孤儿链接已清理;桌面残留的
   build-log/build-done 临时文件已删。
+
+## 2026-08-19 会话:dsh 升级 rc.7 + 安装 dshmarket 插件市场
+
+用户要装插件市场插件(dshmarket)。其 peer 依赖 `@deepseek-ai/dsh-settings@^0.1.0-rc.7`,
+而全局 dsh 是 rc.6 → 直接 `npm i -g @deepseek-ai/dsh@latest` 升到 rc.7(插件包 peer
+`^0.1.0-rc.6` 的 semver 范围涵盖 rc.7,插件零改动)。
+
+- **dshmarket 安装**:`dsh plugin --profile web add dshmarket` 默认解析到 1.13.1——
+  pnpm 的 `minimumReleaseAge` 供应链策略排除了当天发布的 1.15.0;显式
+  `add dshmarket@1.15.0`(自动写入 minimumReleaseAgeExclude 豁免)后落到 1.15.0。
+- **rc.7 下回归验证**(插件工作区依赖仍是 rc.6,双版本并存,与此前结构相同):
+  - `dsh --profile web --dump-config`:dshmarket `dsh-market` 行 + 全部 5 个
+    rollback 插件行装配 ✓
+  - `dsh web` 启动 HTTP 200、日志干净 ✓;rollback 两个客户端包 200
+    (153KB/178KB,与 rc.6 启动时逐字节同尺寸)✓;dshmarket client.js 200(299KB)✓
+  - 说明:仅启动级验证;rc.7 下的完整回滚功能链路未重跑(需 API key 真实会话)。
+- **发现**:profile node_modules 里有一个悬空 `dsh` junction(指向已删的旧源码树
+  位置 `Desktop\dsh`),无害残留——核心 @deepseek-ai/* 包解析走全局 dsh 安装,
+  不经 profile;此前 rc.6 下能正常启动也印证了这点。
+- README 前置条件更新为 dsh `0.1.0-rc.6` / `0.1.0-rc.7`。

@@ -43,7 +43,7 @@
 ## 安装办法
 
 ### 前置条件
-- Node.js(`^22.19 || >=24`)与 dsh `0.1.0-rc.6`
+- Node.js(`^22.19 || >=24`)与 dsh `0.1.0-rc.6` / `0.1.0-rc.7`
 - 浏览器界面需要 `dsh-web-app` 表面(web profile 默认满足;headless profile 可删去 patch 里两行 `client-rollback-*`)
 
 ### 安装

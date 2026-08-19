@@ -43,7 +43,7 @@ The plugin ships as an **installable bundle**: a standalone workspace that never
 ## Installation
 
 ### Prerequisites
-- Node.js (`^22.19 || >=24`) and dsh `0.1.0-rc.6`
+- Node.js (`^22.19 || >=24`) and dsh `0.1.0-rc.6` / `0.1.0-rc.7`
 - The browser half needs the `dsh-web-app` surface (the web profile provides it by default; headless profiles may drop the two `client-rollback-*` rows from the bundle patch)
 
 ### Install
