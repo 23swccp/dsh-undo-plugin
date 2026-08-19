@@ -65,16 +65,7 @@ Run `/update` in any session (requires a git-clone install), then restart dsh. M
 ```sh
 git pull && pnpm install && pnpm run build
 ```
-**Plugin-only rule:** this repository is a pure plugin against the published
-dsh API — never modify dsh's own source. Missing dsh capabilities are solved
-in-plugin (e.g. the Archive Tasks nav glyph via `navIconPatch.tsx`); genuine
-dsh bugs/improvements go upstream as separate PRs, and this plugin never
-depends on their merge.
 
-### Platform support
-The plugin runs on Windows, macOS, and Linux; CI verifies install, typecheck, tests, and build on all three platforms (`ubuntu-latest` / `macos-latest` / `windows-latest`).
-
-Windows only: `link:` installs from a path containing spaces get split by pnpm — install through a junction without spaces.
 
 ## Package layout
 
