@@ -2,55 +2,68 @@
 
 [English](README.md) | 中文
 
-[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(`dsh`)的对话撤销与归档任务管理插件,以**可安装的插件 bundle** 形式交付——独立工作区,不打补丁、不修改 dsh 本体,只使用 npm 上发布的 dsh 公开 API(`@deepseek-ai/dsh-*@0.1.0-rc.6`)。
+## 大致介绍
 
-> **注:**仓库与各包沿用历史名 `rollback`;面向用户的命令是 `/undo`(撤销最近一条已完成消息)与 `/update`(自更新)。
+[dsh-undo-plugin](https://github.com/23swccp/dsh-undo) 是 [DeepSeek Harness (dsh)](https://github.com/deepseek-ai/deepseek-harness) 的对话撤销插件:一句 `/undo` 就能把**工作区文件和对话一起**退回到最近一条已完成消息之前;被回滚的会话进入"设置 → 归档任务"统一管理(查看 / 恢复 / 永久删除 / 全部删除)。回滚错了也不要紧——输入框上方的"撤回回滚"折叠条可以完整恢复。
 
-## 功能
+插件以**可安装 bundle** 形式交付:独立工作区、不打补丁、不修改 dsh 本体,只使用 npm 上发布的 dsh 公开 API(`@deepseek-ai/dsh-*@0.1.0-rc.6`)。文件回滚走插件私有的 Shadow Git 快照(独立 `GIT_DIR`,绝不碰你的 `.git`)。
 
-### 对话回滚
+> **注:** 仓库与各包沿用历史名 `rollback`;面向用户的命令是 `/undo`(撤销)与 `/update`(自更新)。
 
-三个触发入口:会话头部的"回滚"按钮、`/undo` 斜杠命令、以及下文撤回条所述的回滚操作。一次回滚会:
+## 具体功能
 
-- 从插件私有的 Shadow Git 快照恢复文件树(独立 `GIT_DIR`,绝不写用户 `.git`);
-- 把对话 fork 成新 Session,其 seed 是目标消息**之前**的完整事件前缀——模型永远看不到被回滚的提示词、回复与工具调用;
-- 归档旧 Session(从侧边栏消失),并自动把 UI 导航到 child 会话;
-- 快照在 `agent/pre-step` 捕获;捕获失败会拒绝该步骤(模型不收 prompt),并把原提示词与已脱敏技术详情回填 composer。
+### 对话撤销(回滚)
+- **三个入口**:会话头部"回滚"按钮、`/undo` 斜杠命令、输入框上方折叠条
+- 文件树从私有 Shadow Git 快照恢复;对话 fork 成新会话(seed 是目标消息**之前**的完整事件前缀——模型永远看不到被回滚的提示词、回复与工具调用)
+- 旧会话自动归档并从侧边栏消失,UI 自动切换到新会话
+- 快照在 `agent/pre-step` 捕获;失败会拒绝该步骤(模型不收 prompt),并把原提示词与脱敏原因回填输入框
 
 ### 撤回回滚
-
-回滚后,输入框上方折叠条显示 `↩ 已回滚 <提示词预览> [撤回回滚]`。仅当回滚对存在时出现,新 prompt 被接纳后自动消失。撤回是完整的反向事务:
-
-- 先校验工作区树仍等于回滚前的树——工作区已分叉则拒绝(`workspace-diverged`),不覆盖用户改动;
-- 把归档的源会话 fork 回可见会话、恢复文件、重新武装回滚点,回滚与撤回对称且可重复;
-- `restoring` / `revoking` 相位 journal 在启动时按磁盘证据确定性恢复。
+- 仅在回滚后出现 `↩ 已回滚 <预览> [撤回回滚]` 折叠条,新 prompt 接纳后自动消失
+- 完整反向事务:先校验工作区未被改动(已分叉则拒绝 `workspace-diverged`,不覆盖你的修改)→ 恢复源会话与文件 → 重新武装回滚点;回滚与撤回对称、可重复
+- `restoring` / `revoking` 相位 journal 在启动时按磁盘证据确定性恢复
 
 ### 归档任务(设置 → 归档任务)
-
-- 列出全部归档 Session(标题、时间、工作区)。
-- 只读查看对话内容。
-- **恢复**:把归档对话 fork 回新会话(可重复恢复;归档条目保留)。
-- **删除**:永久删除该会话的磁盘日志目录;busy 的 agent 先 cancel 并等 idle。
-- **全部删除**:一次批量 RPC,二次确认;部分失败提示"已删除 X 个,Y 个失败"。
+- 列出全部归档会话(标题 / 归档时间 / 创建时间 / 工作区),支持只读查看
+- **恢复**:把归档对话 fork 回新会话(可重复恢复,归档条目保留)
+- **删除**:永久删除该会话的磁盘日志(busy 的 agent 先 cancel 并等 idle)
+- **全部删除**:一次批量 RPC + 二次确认;部分失败提示"已删除 X 个,Y 个失败"
 
 ### 自更新
+- 任意会话执行 `/update`:一键完成 `git pull --ff-only` → `pnpm install` → `pnpm run build`(分步超时保护;已是最新则跳过安装构建),重启 dsh 生效
+- 无后台自动更新,永远由用户显式发起;`--ff-only` 绝不改写本地提交
 
-在任意会话执行 `/update`:一次完成拉取最新代码(`--ff-only`,绝不改写本地提交)、安装依赖、重新构建;重启 dsh 生效。没有后台自动更新——更新永远由用户显式发起。
+### 性能与可靠性
+- 7,400+ 文件工作区实测:**回滚 / 撤回各约 1 秒**(优化前感知 30–40s)
+- 关键优化:单次 `diff-tree` 路径限定 restore、`untrackedCache` + `splitIndex`、fork ∥ restore 并行、stat 预热 + 下一代 prearm
+- Windows 原子写入:`EPERM` / `EBUSY` / `EACCES` rename 指数退避重试 + 临时文件自动清理
 
-### 性能
+## 安装办法
 
-在约 7,400 文件的工作区实测(优化前 → 优化后):
+### 前置条件
+- Node.js(`^22.19 || >=24`)与 dsh `0.1.0-rc.6`
+- 浏览器界面需要 `dsh-web-app` 表面(web profile 默认满足;headless profile 可删去 patch 里两行 `client-rollback-*`)
 
-- 路径限定 restore:单次 `git diff-tree --name-status` 驱动(全量 `checkout-index --all` ≈ 9.7s → 仅检出变更路径)。
-- 影子仓库启用 `core.untrackedCache` + `core.splitIndex`(热 `git add --all` 5.8s → 0.3s)。
-- 后台 stat 预热 + 下一代 prearm:回滚产生的新分支第一条消息不再付出约 31s 的冷快照成本。
-- fork ∥ restore 并行;每次 arm 的按工作区断言缓存。
-- 综合效果:回滚与撤回各约一秒完成(此前感知 30–40s)。
+### 安装
+```sh
+git clone https://github.com/23swccp/dsh-undo.git
+cd dsh-undo
+pnpm install
+pnpm run build
+dsh plugin --profile web add ./packages/bundle-rollback
+```
 
-### 可靠性
+重启 dsh 后:会话头部出现"回滚"按钮,输入 `/undo` 可直接回滚;设置里出现"归档任务"页。
 
-- Windows 友好的原子写入:`EPERM` / `EBUSY` / `EACCES` 的 rename 指数退避重试,失败临时文件自动清理。
-- bundle patch 禁用基础 bundle 的 `session-archive` / `ui-settings-archive` 行,由本插件完全接管 `sessionArchive` 命名空间。
+### 更新
+在任意会话执行 `/update`(要求以 git clone 方式安装),完成后重启 dsh。手动等价:
+
+```sh
+git pull && pnpm install && pnpm run build
+```
+
+### Windows 注意
+从含空格的路径以 `link:` 安装会被 pnpm 拆分——请经由无空格的 junction 安装。
 
 ## 包结构
 
@@ -58,37 +71,11 @@
 |---|---|
 | `packages/rollback-fork` | Session fork 能力:completed-turn / before-user-message 精确切分 |
 | `packages/rollback-archive` | 归档能力:列表、只读查看、恢复、永久删除、全部删除 |
-| `packages/rollback-undo` | Shadow Git journal + 回滚/撤回编排 + `/undo` 命令 |
+| `packages/rollback-undo` | Shadow Git journal + 回滚/撤回编排 + `/undo`、`/update` 命令 |
 | `packages/client-rollback-button` | 浏览器:会话头部回滚按钮与撤回折叠条(自 mount Remote) |
 | `packages/client-rollback-settings` | 浏览器:归档任务设置页(自 mount Remote) |
 | `packages/bundle-rollback` | 可安装 bundle:`cordis.patch.yml` + 依赖清单 |
-| `packages/typert-protocol` | vendor 的 `@deepseek-ai/dsh-typert-protocol` 源码(typert 生成需要,见下) |
-
-## 安装
-
-```sh
-# 在带 dsh web 表面的 profile 里
-dsh plugin --profile web add /path/to/dsh-rollback-plugin/packages/bundle-rollback
-```
-
-前置条件:dsh `0.1.0-rc.6`(peer 范围);浏览器侧需要 `dsh-web-app` 表面(槽位 `conversation.session.header.actions`、`conversation.input.dock`、`settings.section`,以及 `ctx.remote.$mount`)。headless profile 可从 `packages/bundle-rollback/cordis.patch.yml` 删去两行 `client-rollback-*`。
-
-Windows 注意:从含空格的路径以 `link:` 安装会被 pnpm 拆分——请经由无空格的 junction 安装。
-
-## 更新已安装的插件
-
-在任意会话运行 `/update` 命令(要求本插件以 git clone 方式安装):自动执行 `git pull --ff-only` → `pnpm install` → `pnpm run build`(分步超时保护);HEAD 没有移动时报告"已是最新"并跳过安装构建。完成后重启 dsh——link 安装的 profile 自动使用重建后的 `lib/`。
-
-手动等价操作:
-
-```sh
-git pull
-pnpm install        # 仅依赖变化时需要
-pnpm run build
-# 重启 dsh
-```
-
-没有后台自动更新;更新永远由用户显式发起。
+| `packages/typert-protocol` | vendor 的 `@deepseek-ai/dsh-typert-protocol` 源码(typert 生成需要) |
 
 ## 开发
 
