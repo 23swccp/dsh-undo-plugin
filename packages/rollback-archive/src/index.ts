@@ -7,7 +7,8 @@
  * @module @dsh-rollback/rollback-archive
  */
 
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { randomBytes } from 'node:crypto'
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { Context, Service } from '@deepseek-ai/cordis'
 import s from '@deepseek-ai/schemastery'
@@ -301,7 +302,14 @@ export class DefaultSessionArchiveService extends TypertRemoteService implements
   /** Atomically replace one plugin-owned JSON document. */
   private async writeDocument(path: string, value: unknown): Promise<void> {
     await mkdir(dirname(path), { recursive: true })
-    await writeFile(path, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
+    const temporary = `${path}.${randomBytes(6).toString('hex')}.tmp`
+    await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
+    try {
+      await renameWithRetry(temporary, path)
+    } catch (error) {
+      await rm(temporary, { force: true })
+      throw error
+    }
   }
 
   /** Make one immutable success result. */
@@ -318,6 +326,23 @@ export class DefaultSessionArchiveService extends TypertRemoteService implements
 /** Find a persisted title without consulting live title-service state. */
 function titleOf(events: readonly SessionEvent[]): string | undefined {
   return foldSessionTitle(events)?.title
+}
+
+/** Retry `rename` on transient Windows locks (Defender, file indexers). */
+async function renameWithRetry(from: string, to: string, retries = 5): Promise<void> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await rename(from, to)
+      return
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code
+      if (attempt < retries && (code === 'EPERM' || code === 'EBUSY' || code === 'EACCES')) {
+        await new Promise<void>(resolve => { setTimeout(resolve, 100 * (attempt + 1)) })
+        continue
+      }
+      throw error
+    }
+  }
 }
 
 /** Preserve ordinary text exchange for the archive viewer; tool payloads remain outside this presentation. */

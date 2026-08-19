@@ -3,7 +3,10 @@
 import puppeteer from 'puppeteer-core'
 
 const URL = process.env.DSH_WEB_URL ?? 'http://127.0.0.1:3080'
-const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+const CHROME = process.env.CHROME
+  ?? (process.platform === 'win32' ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+    : process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+    : '/usr/bin/google-chrome')
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const browser = await puppeteer.launch({
