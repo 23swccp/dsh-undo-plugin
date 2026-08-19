@@ -3,7 +3,7 @@
 # rows here insert new plugin entries. `dshHomePath` is the host-side
 # expression the dsh boot injects for application-data roots.
 #
-# Headless profiles may drop the two `client-rollback-*` rows (they require
+# Headless profiles may drop the four `client-rollback-*` rows (they require
 # the dsh-web-app browser surface).
 - insert:
     - id: rollback-fork
@@ -24,6 +24,12 @@
 
     - id: client-rollback-settings
       name: '@dsh-rollback/client-rollback-settings'
+
+    - id: client-rollback-toolcards
+      name: '@dsh-rollback/client-rollback-toolcards'
+
+    - id: client-rollback-trailfold
+      name: '@dsh-rollback/client-rollback-trailfold'
 
 # The base web-app bundle also ships ui-settings-archive and session-archive,
 # whose sessionArchive Remote contributions claim the namespace first and block

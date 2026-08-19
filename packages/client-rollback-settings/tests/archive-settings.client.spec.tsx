@@ -2,6 +2,8 @@
 /** User-visible archive actions: read-only view, restore, and permanent delete. */
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ArchiveSettingsSection } from '../src/client/ArchiveSettingsSection.tsx'
 import type { ArchiveSettingsProps } from '../src/client/ArchiveSettingsSection.tsx'
@@ -93,5 +95,25 @@ describe('ArchiveSettingsSection', () => {
     expect(screen.getByText('preserved prompt')).toBeTruthy()
     expect(erase).not.toHaveBeenCalled()
     expect(restore).not.toHaveBeenCalled()
+  })
+})
+
+describe('bulk delete-all button style contract', () => {
+  // jsdom runs specs with a non-file import.meta.url, so resolve from cwd.
+  const css = readFileSync(
+    resolve(process.cwd(), 'packages/client-rollback-settings/src/client/ArchiveSettingsSection.module.css'),
+    'utf8',
+  )
+
+  it('styles the bulk area buttons with the dsh rounded recipe (28px pill, radius 14px)', () => {
+    // The delete-all buttons live in .bulk (and its inline .confirm), which
+    // previously fell through to browser-default square chrome.
+    expect(css).toMatch(/\.bulk button[^{]*{[^}]*border-radius:\s*14px/s)
+    expect(css).toMatch(/\.bulk button[^{]*{[^}]*min-height:\s*28px/s)
+    expect(css).toMatch(/\.bulk \.danger\s*\{[^}]*--dsw/s)
+  })
+
+  it('lays out the bulk row itself', () => {
+    expect(css).toMatch(/^\.bulk\s*{[^}]*display:\s*flex/m)
   })
 })

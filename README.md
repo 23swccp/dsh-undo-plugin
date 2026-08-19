@@ -31,6 +31,16 @@ The plugin ships as an **installable bundle**: a standalone workspace that never
 - **Delete**: permanently removes the session's on-disk log directory; busy agents are cancelled and awaited idle first
 - **Delete all**: one batch RPC with a double-confirm dialog; partial failures report "deleted X, Y failed"
 
+### Reasoning-and-actions fold
+- Every prompt turn gets its own "reasoning & actions" collapse bar: the turn's Think steps, intermediate narration, context injections, and all tool calls fold away together; **the final conclusion and the stats row never fold**
+- A running turn shows a "running" hint and stays expanded; once it closes while the view is following at the bottom it auto-collapses; manual clicks always override
+- Turns without a conclusion (e.g. ending on a failing tool call) never fold — errors stay visible; history loads expanded
+- Pure CSS/DOM injection keyed on the renderer's stable `data-chat-flow-kind` boundaries (user / assistant-step / tool-call / turn-tail); React-owned node structure is never touched
+
+### Tool card colors
+- Every expanded tool-call card in a conversation is tinted by tool type: the **bash terminal card stays near-black** (kept dark even under the light theme), the **pwsh terminal card gets the PowerShell-window blue**, and the rest carry theme-coordinated tints (edit green / read violet / search blue / web teal / code amber)
+- Pure CSS injection keyed on the stable `data-*` hooks the stock renderer already publishes (`data-tool`, `data-terminal`, `data-diff`, …) — no hashed class names, React re-renders re-apply automatically
+
 ### Self-update
 - `/update` in any session runs `git pull --ff-only` → `pnpm install` → `pnpm run build` in one pass (per-step timeouts; skips install/build when already up to date); restart dsh to activate
 - No background auto-update — updating always starts from an explicit user action; `--ff-only` never rewrites local commits
@@ -44,7 +54,7 @@ The plugin ships as an **installable bundle**: a standalone workspace that never
 
 ### Prerequisites
 - Node.js (`^22.19 || >=24`) and dsh `0.1.0-rc.6` / `0.1.0-rc.7`
-- The browser half needs the `dsh-web-app` surface (the web profile provides it by default; headless profiles may drop the two `client-rollback-*` rows from the bundle patch)
+- The browser half needs the `dsh-web-app` surface (the web profile provides it by default; headless profiles may drop the four `client-rollback-*` rows from the bundle patch)
 
 ### Install
 ```sh
@@ -52,12 +62,12 @@ git clone https://github.com/23swccp/dsh-undo.git
 cd dsh-undo
 pnpm install
 pnpm run build
-dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/bundle-rollback
+dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/client-rollback-toolcards ./packages/client-rollback-trailfold ./packages/bundle-rollback
 ```
 
-All six packages must be linked: pnpm's `link:` protocol does not install a linked bundle's dependencies, and the dsh loader resolves plugin package names from the profile's `node_modules`, so the five plugin packages need their own links next to the bundle.
+All eight packages must be linked: pnpm's `link:` protocol does not install a linked bundle's dependencies, and the dsh loader resolves plugin package names from the profile's `node_modules`, so the seven plugin packages need their own links next to the bundle.
 
-After restarting dsh: the session header gains the rollback button, `/undo` rolls back directly, and the Settings dialog gains the Archive Tasks page.
+After restarting dsh: the session header gains the rollback button, `/undo` rolls back directly, the Settings dialog gains the Archive Tasks page, every turn gains the reasoning-and-actions fold bar, and expanded tool-call cards are colored per tool type.
 
 ### Update
 Run `/update` in any session (requires a git-clone install), then restart dsh. Manual equivalent:
@@ -76,6 +86,8 @@ git pull && pnpm install && pnpm run build
 | `packages/rollback-undo` | Shadow-Git journal + rollback/revoke orchestration + the `/undo` and `/update` commands |
 | `packages/client-rollback-button` | Browser: session-header rollback action and the revoke strip (self-mounted Remotes) |
 | `packages/client-rollback-settings` | Browser: Archive Tasks settings page (self-mounted Remotes) |
+| `packages/client-rollback-toolcards` | Browser: per-tool-type colors for expanded tool-call cards (CSS-only injection) |
+| `packages/client-rollback-trailfold` | Browser: per-turn reasoning-and-actions fold bar (DOM injection) |
 | `packages/bundle-rollback` | Installable bundle: `cordis.patch.yml` + dependency manifest |
 | `packages/typert-protocol` | Vendored `@deepseek-ai/dsh-typert-protocol` source (required by the typert generator, see below) |
 
@@ -84,7 +96,7 @@ git pull && pnpm install && pnpm run build
 ```sh
 pnpm install
 pnpm run typecheck   # builds host artifacts (typert generation) then checks the client face
-pnpm test            # vitest, 8 files / 35 tests
+pnpm test            # vitest, 11 files / 53 tests
 pnpm run build       # host lib + client bundles (lib/client.js)
 ```
 

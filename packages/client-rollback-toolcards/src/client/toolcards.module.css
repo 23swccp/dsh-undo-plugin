@@ -1,0 +1,99 @@
+/**
+ * Per-tool background colors for the dsh web conversation tool cards.
+ *
+ * The stock dsh-client-ui-tool rows theme every expanded card with the same
+ * --dsw-alias-* values (one code-block surface for bash, pwsh, edit, search,
+ * …). This stylesheet re-colors the expanded card per tool type, using only
+ * stable DOM hooks the rc.7 renderer already publishes:
+ *
+ *   - generic ToolRow root:      [data-tool="<wire tool name>"], body inside
+ *   - keyed BashRow row root:    [data-sample="bash"], body is the NEXT
+ *                                sibling (the card wrapper renders row and
+ *                                body as siblings), so `+ div > div` reaches
+ *                                the terminal / io card for both states
+ *   - card primitives:           [data-terminal], [data-diff], [data-read],
+ *                                [data-search], [data-web], .md-code-block
+ *                                (the literal marker class on CodeBlock)
+ *
+ * Two strategies, matching how the cards paint themselves:
+ *   - shells (bash / pwsh): the card's --dsw-alias-* custom properties are
+ *     re-pointed to static dark values ON the card element, so the card and
+ *     every descendant (command lines, output, copy button, banners) adopt
+ *     the dark shell in both light and dark themes — the same approach the
+ *     fork's main tree used for the always-black bash terminal.
+ *   - tints (edit / write / read / grep / glob / web / run_code): a
+ *     color-mix() share of the tool's hue over the theme's code-block color,
+ *     so the card stays coordinated with the active light/dark theme.
+ *
+ * No hashed CSS-module classes are referenced; specificity of every selector
+ * here (≥ 0,2,0) beats the hashed single-class rules it overrides.
+ */
+
+/* ── bash: near-black terminal card in every theme ──────────────────────────
+ * The keyed BashRow renders [data-sample="bash"] with the expanded body as
+ * the following sibling; `> div` is the terminal card (or the IN/OUT error
+ * card). [data-tool="bash"] covers the generic-row fallback should the keyed
+ * view ever be unavailable. */
+[data-sample="bash"] + div > div,
+[data-tool="bash"] [data-terminal] {
+  --dsw-alias-markdown-code-block: #0d1117;
+  --dsw-alias-markdown-code-block-banner: #161b22;
+  --dsw-alias-label-primary: #e6edf3;
+  --dsw-alias-label-secondary: #9aa4b2;
+  --dsw-alias-label-tertiary: #7d8590;
+  --dsw-alias-label-caption: #6e7681;
+  --dsw-alias-border-l1: #262d36;
+  --dsw-alias-border-l2: #30363d;
+  --dsw-alias-state-error-primary: #f8614d;
+  background: #0d1117;
+  color: #e6edf3;
+  border-color: #262d36;
+}
+
+/* ── pwsh: PowerShell-window blue terminal card ───────────────────────────── */
+[data-tool="pwsh"] [data-terminal] {
+  --dsw-alias-markdown-code-block: #012456;
+  --dsw-alias-markdown-code-block-banner: #012456;
+  --dsw-alias-label-primary: #eaf1ff;
+  --dsw-alias-label-secondary: #b8c9ec;
+  --dsw-alias-label-tertiary: #94a9d6;
+  --dsw-alias-label-caption: #7e93c4;
+  --dsw-alias-border-l1: #274a86;
+  --dsw-alias-border-l2: #33598f;
+  --dsw-alias-state-error-primary: #ff9d9d;
+  background: #012456;
+  color: #eaf1ff;
+  border-color: #274a86;
+}
+
+/* ── edit / write: diff cards, green tint ─────────────────────────────────── */
+[data-tool="edit"] [data-diff],
+[data-tool="write"] [data-diff] {
+  background: color-mix(in srgb, #2da44e 12%, var(--dsw-alias-markdown-code-block));
+}
+
+/* ── read: file cards, violet tint (banner one step stronger) ─────────────── */
+[data-tool="read"] [data-read] {
+  --dsw-alias-markdown-code-block-banner: color-mix(in srgb, #8957e5 14%, var(--dsw-alias-markdown-code-block));
+  background: color-mix(in srgb, #8957e5 10%, var(--dsw-alias-markdown-code-block));
+}
+
+/* ── grep / glob: search cards, blue tint (header one step stronger) ──────── */
+[data-tool="grep"] [data-search],
+[data-tool="glob"] [data-search] {
+  --dsw-alias-markdown-code-block-banner: color-mix(in srgb, #4493f8 14%, var(--dsw-alias-markdown-code-block));
+  background: color-mix(in srgb, #4493f8 10%, var(--dsw-alias-markdown-code-block));
+}
+
+/* ── web_search / web_fetch: retrieval cards, teal tint ───────────────────── */
+[data-tool="web_search"] [data-web],
+[data-tool="web_fetch"] [data-web] {
+  background: color-mix(in srgb, #12a5b0 10%, var(--dsw-alias-markdown-code-block));
+}
+
+/* ── run_code: code cards, amber tint ─────────────────────────────────────── */
+/* :global escapes the css-modules transform — plain class selectors would be
+ * hashed into module-locals (`.x_md-code-block`) and never match the DOM. */
+[data-tool="run_code"] :global(.md-code-block) {
+  background: color-mix(in srgb, #d29922 10%, var(--dsw-alias-markdown-code-block));
+}

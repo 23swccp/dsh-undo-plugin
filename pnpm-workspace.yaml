@@ -17,6 +17,8 @@ overrides:
   '@dsh-rollback/rollback-undo': workspace:^
   '@dsh-rollback/client-rollback-button': workspace:^
   '@dsh-rollback/client-rollback-settings': workspace:^
+  '@dsh-rollback/client-rollback-toolcards': workspace:^
+  '@dsh-rollback/client-rollback-trailfold': workspace:^
 patchedDependencies:
   '@deepseek-ai/dsh-typert-generator@0.1.0-rc.6':
     patches/typert-generator-workspace-only.patch

@@ -31,6 +31,16 @@
 - **删除**:永久删除该会话的磁盘日志(busy 的 agent 先 cancel 并等 idle)
 - **全部删除**:一次批量 RPC + 二次确认;部分失败提示"已删除 X 个,Y 个失败"
 
+### 推理与行动折叠条
+- 每个 prompt 回合获得独立的「推理与行动」折叠条:该回合的思考(Think)、中间叙述、上下文注入与全部工具调用整段收起/展开;**最终结论与统计行永不折叠**
+- 回合运行中显示"运行中…"并保持展开;回合结束且视图跟随到底部时自动收起;手动点击随时覆盖
+- 无结论回合(如以报错工具调用收尾)不折叠——错误保持可见;加载的历史回合保持展开
+- 纯 CSS/DOM 注入:只依赖官方渲染器发布的稳定 `data-chat-flow-kind` 边界(user / assistant-step / tool-call / turn-tail),不触碰 React 管理的节点结构
+
+### 工具卡片配色
+- 会话里每个工具调用(pwsh/bash、edit/write、read、grep/glob、web、run_code)展开后的内容卡片按工具类型着色:**bash 终端卡恒为黑底**(亮色主题下也保持)、**pwsh 终端卡为 PowerShell 窗口同款蓝**、其余工具为与主题协调的浅色调(edit 绿 / read 紫 / 搜索蓝 / web 青 / 代码琥珀)
+- 纯 CSS 注入:只用官方渲染器已发布的稳定 `data-*` 钩子(`data-tool`、`data-terminal`、`data-diff` 等),不依赖哈希类名,React 重渲染自动生效
+
 ### 自更新
 - 任意会话执行 `/update`:一键完成 `git pull --ff-only` → `pnpm install` → `pnpm run build`(分步超时保护;已是最新则跳过安装构建),重启 dsh 生效
 - 无后台自动更新,永远由用户显式发起;`--ff-only` 绝不改写本地提交
@@ -44,7 +54,7 @@
 
 ### 前置条件
 - Node.js(`^22.19 || >=24`)与 dsh `0.1.0-rc.6` / `0.1.0-rc.7`
-- 浏览器界面需要 `dsh-web-app` 表面(web profile 默认满足;headless profile 可删去 patch 里两行 `client-rollback-*`)
+- 浏览器界面需要 `dsh-web-app` 表面(web profile 默认满足;headless profile 可删去 patch 里四行 `client-rollback-*`)
 
 ### 安装
 ```sh
@@ -52,12 +62,12 @@ git clone https://github.com/23swccp/dsh-undo.git
 cd dsh-undo
 pnpm install
 pnpm run build
-dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/bundle-rollback
+dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/client-rollback-toolcards ./packages/client-rollback-trailfold ./packages/bundle-rollback
 ```
 
-六个包都要 link:pnpm 的 `link:` 协议不会安装被链接 bundle 的依赖,而 dsh 加载器从 profile 的 `node_modules` 解析插件包名,因此五个插件包需要与 bundle 一起各自 link。
+八个包都要 link:pnpm 的 `link:` 协议不会安装被链接 bundle 的依赖,而 dsh 加载器从 profile 的 `node_modules` 解析插件包名,因此七个插件包需要与 bundle 一起各自 link。
 
-重启 dsh 后:会话头部出现"回滚"按钮,输入 `/undo` 可直接回滚;设置里出现"归档任务"页。
+重启 dsh 后:会话头部出现"回滚"按钮,输入 `/undo` 可直接回滚;设置里出现"归档任务"页;每回合出现「推理与行动」折叠条;工具调用展开卡片按工具类型着色。
 
 ### 更新
 在任意会话执行 `/update`(要求以 git clone 方式安装),完成后重启 dsh。手动等价:
@@ -76,6 +86,8 @@ git pull && pnpm install && pnpm run build
 | `packages/rollback-undo` | Shadow Git journal + 回滚/撤回编排 + `/undo`、`/update` 命令 |
 | `packages/client-rollback-button` | 浏览器:会话头部回滚按钮与撤回折叠条(自 mount Remote) |
 | `packages/client-rollback-settings` | 浏览器:归档任务设置页(自 mount Remote) |
+| `packages/client-rollback-toolcards` | 浏览器:工具卡片按工具类型着色(纯 CSS 注入) |
+| `packages/client-rollback-trailfold` | 浏览器:每回合「推理与行动」折叠条(DOM 注入) |
 | `packages/bundle-rollback` | 可安装 bundle:`cordis.patch.yml` + 依赖清单 |
 | `packages/typert-protocol` | vendor 的 `@deepseek-ai/dsh-typert-protocol` 源码(typert 生成需要) |
 
@@ -84,7 +96,7 @@ git pull && pnpm install && pnpm run build
 ```sh
 pnpm install
 pnpm run typecheck   # 先构建 host 产物(typert 生成),再检查 client 面
-pnpm test            # vitest,8 个文件 / 35 个用例
+pnpm test            # vitest,11 个文件 / 53 个用例
 pnpm run build       # host lib + client bundle(lib/client.js)
 ```
 

@@ -533,3 +533,133 @@ locale 变化由 observer 幂等重扫覆盖(`data-nav-icon` 标记防重复)。
   (shadow-git×2、update×2)本机稳定超时 30s + EBUSY——stash 对照实验证明与
   本次改动无关(不 stash 同样失败);Defender/索引器锁 Temp 目录所致,CI
   (ubuntu/macos/windows 隔离环境)为准。
+
+## 2026-08-19 会话:工具卡片按工具类型着色(client-rollback-toolcards)
+
+用户报告:从 dsh 主树源码切到 npm rc.7 后,会话里工具调用的「推理行动
+折叠条」与「工具专属配色卡片」两个表现消失。
+
+**诊断(先于修复,结论与任务描述的猜测不同)**:
+- 折叠条**并未丢失**。rc.7 的 `@deepseek-ai/dsh-client-ui-tool` 完整实现
+  折叠条(GenericToolCard/ToolRow + DisclosureRow、keyed BashRow),禁缓存
+  加载历史会话实测 5 条工具行全部渲染、可展开——用户看到的缺失只是
+  浏览器缓存/旧页面层面的假象,无需修补装配。
+- 真正缺失的是**工具专属配色**:rc.7 的 ui-tool CSS 只有统一
+  `--dsw-alias-*` 主题变量,所有卡片(terminal/diff/read/search/web/code)
+  一律 `var(--dsw-alias-markdown-code-block)`(浅色主题下
+  `rgb(249,250,251)`)。主树曾有「bash 终端卡恒黑」
+  (bash-sample.module.css 作用域 token 覆盖,2026-08-17 会话),该改动
+  未进 npm 发布——这正是用户记忆中「bash 黑底」的来源。
+- rc.7 渲染器已发布稳定 DOM 钩子(非哈希类名),CSS 注入完全可行:
+  通用行根 `[data-tool]` + 卡片 `[data-terminal]`/`[data-diff]`/
+  `[data-read]`/`[data-search]`/`[data-web]`/`.md-code-block`(CodeBlock
+  的字面量 marker class);keyed BashRow 行根 `[data-sample="bash"]`,
+  展开体是它的**下一个兄弟**(`+ div > div`,card 包裹层内 row 与 body
+  是兄弟,不能写后代选择器);pwsh 标题存在(`TOOL_TITLES.pwsh`)但
+  **没有 keyed 行**,落 GenericToolCard 路径(`data-tool="pwsh"`)。
+
+**实现(纯插件侧,零运行时代码)**:
+- 新包 `packages/client-rollback-toolcards`:单文件 CSS
+  (`src/client/toolcards.module.css`)+ 空 apply。构建链把它编译成
+  `lib/client.js`(`__ModuleLoader__.load` 闭包),import 即注入
+  `<style data-plugin="@dsh-rollback/client-rollback-toolcards">`;每条规则
+  只用 data 属性钩子,specificity(≥0,2,0)压过宿主哈希单类规则,
+  React 重渲染由层叠自动覆盖——不需要 MutationObserver。
+- 两种着色策略:**外壳型**(bash/pwsh)把卡片元素的
+  `--dsw-alias-markdown-code-block/label-*/border-*` 自定义属性整体改指
+  静态深色值 + `background` 钉死(bash `#0d1117` GitHub 暗色黑、pwsh
+  `#012456` PowerShell 窗口蓝),亮暗主题下都保持深色、后代文字/横幅/
+  复制按钮全部跟随;**浅染型**(其余工具)用
+  `color-mix(in srgb, <hue> 10~12%, var(--dsw-alias-markdown-code-block))`
+  在当前主题色上叠色(edit/write 绿 #2da44e、read 紫 #8957e5 且 banner
+  加深、grep/glob 蓝 #4493f8 且 header 加深、web 青 #12a5b0、run_code
+  琥珀 #d29922)。
+- **css-modules 哈希陷阱**:`.md-code-block` 会被 lightningcss 当模块局部
+  类哈希成 `.x_md-code-block` 而永不匹配 DOM——必须写
+  `:global(.md-code-block)`;测试有守卫(选择器不得出现哈希模式/裸类)。
+- 接线:bundle patch 插入 `client-rollback-toolcards` 行 + 依赖清单;
+  pnpm-workspace overrides、tsconfig.client references、README 中英
+  (安装命令改为七个包)同步。
+
+**验证(npm rc.7 + dshmarket 1.15.0,带 DEEPSEEK_API_KEY 真实会话)**:
+- 装配:`dsh plugin --profile web add <包>` 后 dump-config 出现该行;
+  `__DSH_BOOT__.entries` 含 id 且 `/plugins/.../client.js` 200(3KB)。
+- 历史会话(禁缓存加载):pwsh terminal 卡 `rgb(1,36,86)`(#012456)、
+  read 紫、glob 蓝、write diff 绿全部生效;合成 DOM 验证 BashRow 选择器
+  → `rgb(13,17,23)`(#0d1117)与 `--dsw-alias-label-primary:#e6edf3`。
+- 真实新会话(一条 prompt 触发 pwsh/write/read/glob 四工具):4 条折叠
+  条全部渲染、展开后卡片底色分别为蓝/绿/紫/浅蓝,plugin style tag 在。
+- 回归:同会话头部回滚按钮正常(回滚链路不受影响);rollback 两个
+  client 包、dshmarket 装配未动;42 单测通过(新增 toolcards 7 例;
+  4 例已知环境失败同上节)。
+- 新增脚本:`scripts/e2e-toolcards.mjs`(历史会话扫描+合成 bash 验证)、
+  `scripts/e2e-toolcards-live.mjs`(真实会话四工具触发,需服务端带 key)。
+
+**注意**:服务的 API key 只经环境变量注入启动,未写入任何文件;e2e 产生
+的 `toolcards-e2e.txt` 已清理,live 会话留在「dsh 回滚」工作区供肉眼复核
+(侧边栏「PowerShell目录文件操作任务」)。
+
+## 2026-08-19 会话:Edge 验证 + 推理行动折叠条 + 全部删除按钮圆角 + trailfold 包
+
+用户在 Edge 打开验证,报告「折叠条没有出现」,问是否缓存、能否做到任何
+情况都显示;并要求「全部删除」按钮去掉棱角、符合 dsh 圆角风格;完成后
+推送 GitHub。
+
+**Edge 诊断(结论:不是代码 bug)**:
+- 全新 Edge 配置(无缓存)在 `127.0.0.1:3080` 与 `localhost:3080` 两个源
+  下,历史会话的 4 条工具折叠行全部渲染、可展开、零控制台错误——渲染
+  路径完好。
+- `index.html` 响应**没有任何缓存头**(无 Cache-Control/ETag/Last-Modified)
+  → Edge 对其做启发式缓存,旧标签页/旧缓存壳会拿旧 boot manifest
+  (旧插件集、旧资源)——「是缓存问题」成立,Ctrl+Shift+R 或重开标签即恢复。
+  这是 dsh 宿主响应头问题,插件侧不可代修(不改本体)。
+- 但「任何情况均能显示」指向一个真实缺口:rc.7 只有**每条工具调用**的
+  折叠行,没有主树时代的**每回合「推理与行动」一级折叠**(整段思考+叙述
+  +工具收起/展开)。纯文本/纯思考回合在 rc.7 下没有任何折叠条。
+
+**rc.7 消息流 DOM 契约(实现基础,Edge 实测)**:消息流容器
+`[data-chat-flow]`,每个子节点带 `data-chat-flow-kind`(user / context /
+assistant-step / tool-call / turn-tail)与稳定 `data-chat-flow-key`。回合边界
+清晰:user 开回合 → trail(context 注入、Think/叙述 step、tool-call)→
+最后一个 assistant-step(tail 前锚定 = 结论)→ turn-tail(产物+统计)。
+Think 思考行 rc.7 确实渲染(Sxvs8a_root)。
+
+**实现一:client-rollback-trailfold(新包,8 号包)**
+- `planTurns` 纯规划器:user 锚定回合;closedByTail 且尾元素是
+  assistant-step 才有结论(trail = 结论之外的全部);被下一 user 抛弃的
+  回合视为无结论(不折叠,错误可见);flow 末尾无 tail = running。
+- `mountTrailFold` DOM 补丁:外来折叠条插在 trail[0] 前(控制位恒居轨迹
+  上方);折叠 = 逐 flowItem `style.display='none'`(DOM 保留,React 安全,
+  与主树策略一致);MutationObserver 全量幂等重扫(React 重渲染/虚拟化
+  重挂载/会话切换自愈);按 user key 记忆状态。
+- 行为对齐主树:运行中显示「运行中…」保持展开;回合闭合且视图钉在底部
+  (`[data-conversation-scroll]` 距底 <80px)时自动收起,用户上滚阅读时不
+  收;历史首见保持展开;手动点击随时覆盖;无结论/空 trail 无条。
+- **两个深坑**:① `sync()` 无条件重写 `counts.textContent` 会替换文本节点
+  → 触发自己的 observer → 无限循环(vitest 挂死定位)——只在值变化时写;
+  ② 测试里 planner 组遗留的 flow 也会被(正确地)挂条,`document.querySelector`
+  命中别人的 bar——文件级 afterEach 清 body。
+
+**实现二:全部删除按钮圆角**
+- 根因:`.bulk` 容器在 CSS 里**完全没有规则**(TSX 用了、CSS 没写),
+  「全部删除/确认/取消」回落浏览器默认样式(灰底直角 outset 边框)。
+- 修复:补 `.bulk` 布局 + `.bulk button` 共用既有 dsh 配方
+  (28px 高、`border-radius:14px` 胶囊、12px 字号,与 `.actions button`
+  及 dsh `_sm` Button 同款)+ `.bulk .danger` 红色变体。
+- **构建坑再现(HANDOFF 前科)**:根目录 `pnpm run build` 对 settings 的
+  client 产物未重写(mtime 不动,`_bulk` 不进 bundle);在包目录内直跑
+  `pnpm exec tsdown --env.DSH_BUILD_FACE client` 立即正确。改 CSS 后要在
+  包内重建或核对产物含新规则。CI 全新环境无此缓存问题。
+
+**验证(Edge 实测,服务带 key)**:
+- 折叠条:历史回合条在且展开(「推理与行动 2 思考 · 4 工具」);手动收放
+  trail 隐藏/恢复、结论与统计行不动;新回合流式时「运行中…」,闭合后
+  (视图在底)自动收起为「1 工具」;恢复出的会话 4 条 bar 全部正常。
+- 配色回归:pwsh 蓝 rgb(1,36,86)×3、read 紫、glob 浅蓝 ✓。
+- 全部删除:`border-radius:14px`、高 28px、danger 红、12px 字号;确认/
+  取消同款 ✓(回滚→归档→撤回流程顺带回归:回滚/撤回/恢复链路正常)。
+- 测试:11 文件 53 用例通过(trailfold 9 + 归档样式契约 2 新增);
+  4 例已知环境失败不变。
+- 新增脚本:`scripts/edge-verify.mjs`(折叠条+配色+自动收起)、
+  `scripts/edge-verify-archive.mjs`(回滚→按钮样式→撤回);一次性诊断
+  脚本已清理。

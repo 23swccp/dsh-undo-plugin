@@ -14,6 +14,8 @@
   "dependencies": {
     "@dsh-rollback/client-rollback-button": "^0.1.0-rc.6",
     "@dsh-rollback/client-rollback-settings": "^0.1.0-rc.6",
+    "@dsh-rollback/client-rollback-toolcards": "^0.1.0-rc.6",
+    "@dsh-rollback/client-rollback-trailfold": "^0.1.0-rc.6",
     "@dsh-rollback/rollback-archive": "^0.1.0-rc.6",
     "@dsh-rollback/rollback-fork": "^0.1.0-rc.6",
     "@dsh-rollback/rollback-undo": "^0.1.0-rc.6"

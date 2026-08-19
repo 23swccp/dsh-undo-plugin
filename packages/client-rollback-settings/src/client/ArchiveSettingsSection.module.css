@@ -99,7 +99,15 @@
   line-height: 18px;
 }
 
+.bulk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
 .actions button,
+.bulk button,
 .retry button {
   box-sizing: border-box;
   min-height: 28px;
@@ -115,21 +123,25 @@
 }
 
 .actions button:hover:not(:disabled),
+.bulk button:hover:not(:disabled),
 .retry button:hover:not(:disabled) {
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
 .actions button:disabled,
+.bulk button:disabled,
 .retry button:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-.actions .danger {
+.actions .danger,
+.bulk .danger {
   color: var(--dsw-alias-state-error-primary);
 }
 
-.actions .danger:hover:not(:disabled) {
+.actions .danger:hover:not(:disabled),
+.bulk .danger:hover:not(:disabled) {
   background: var(--dsw-alias-interactive-bg-hover-danger);
 }
 

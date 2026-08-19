@@ -1,6 +1,7 @@
 {
   // Client aggregate: browser packages (client-rollback-button,
-  // client-rollback-settings) and their client tests.
+  // client-rollback-settings, client-rollback-toolcards,
+  // client-rollback-trailfold) and their client tests.
   "extends": "./tsconfig.base.client.json",
   "compilerOptions": {
     "noEmit": true,
@@ -10,6 +11,8 @@
   "references": [
     { "path": "./packages/typert-protocol" },
     { "path": "./packages/client-rollback-button" },
-    { "path": "./packages/client-rollback-settings" }
+    { "path": "./packages/client-rollback-settings" },
+    { "path": "./packages/client-rollback-toolcards" },
+    { "path": "./packages/client-rollback-trailfold" }
   ]
 }

@@ -11,6 +11,8 @@ overrides:
   '@dsh-rollback/rollback-undo': workspace:^
   '@dsh-rollback/client-rollback-button': workspace:^
   '@dsh-rollback/client-rollback-settings': workspace:^
+  '@dsh-rollback/client-rollback-toolcards': workspace:^
+  '@dsh-rollback/client-rollback-trailfold': workspace:^
 
 patchedDependencies:
   '@deepseek-ai/dsh-typert-generator@0.1.0-rc.6': 37727cde179f763df87ecac44b9968cc191cb0a85d1fe17abb8bd69797d812df
@@ -73,6 +75,12 @@ importers:
       '@dsh-rollback/client-rollback-settings':
         specifier: workspace:^
         version: link:../client-rollback-settings
+      '@dsh-rollback/client-rollback-toolcards':
+        specifier: workspace:^
+        version: link:../client-rollback-toolcards
+      '@dsh-rollback/client-rollback-trailfold':
+        specifier: workspace:^
+        version: link:../client-rollback-trailfold
       '@dsh-rollback/rollback-archive':
         specifier: workspace:^
         version: link:../rollback-archive
@@ -180,6 +188,24 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+
+  packages/client-rollback-toolcards:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@deepseek-ai/dsh-invariants':
+        specifier: ^0.1.0-rc.6
+        version: 0.1.0-rc.6(@deepseek-ai/cordis@4.0.1)
+
+  packages/client-rollback-trailfold:
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: ^4.0.1
+        version: 4.0.1(@deepseek-ai/cordis-plugin-include@1.0.6)(@deepseek-ai/cordis-plugin-loader@1.0.2)
+      '@deepseek-ai/dsh-invariants':
+        specifier: ^0.1.0-rc.6
+        version: 0.1.0-rc.6(@deepseek-ai/cordis@4.0.1)
 
   packages/rollback-archive:
     dependencies:
