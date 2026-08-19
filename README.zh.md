@@ -65,6 +65,10 @@ dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archiv
 ```sh
 git pull && pnpm install && pnpm run build
 ```
+**插件只改本仓库:** 本仓库是面向已发布 dsh API 的纯插件,永远不要修改 dsh
+本体源码。dsh 缺失的能力一律在插件侧解决(如归档任务导航图标 →
+`navIconPatch.tsx`);确属 dsh 本体的 bug/改进以独立 PR 提交上游,本插件
+不依赖其合并。
 
 ### 平台支持
 插件可运行于 Windows、macOS 与 Linux;CI 在 `ubuntu-latest` / `macos-latest` / `windows-latest` 三平台验证安装、类型检查、测试与构建。

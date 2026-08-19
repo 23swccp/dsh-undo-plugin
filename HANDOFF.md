@@ -4,6 +4,16 @@
 > (`dsh 回滚/` 工作树)方向已废弃;本目录是重新定位后的成品。
 > 与 `dsh-rollback-plugin/PLAN.md`(评审蓝图)配套阅读。
 
+## 开发约定(必读)
+
+- **只改本插件仓库(dsh-undo),永远不改 dsh 本体源码。** 本插件是纯插件,
+  依赖 npm 发布的 dsh 公开 API;改 dsh 源码对 npm 安装的用户无效,只会制造
+  混乱。此前的 `SettingsRoot.tsx` 图标修复(`b4b7072`)即教训。
+- **dsh 缺的能力一律在插件侧解决**(例:归档导航图标 → navIconPatch.tsx)。
+- 确属 dsh 本体的 bug/改进时,以**独立 PR 提交 deepseek-ai 上游**,本插件
+  不得依赖该 PR 合并后的行为。
+- fork 分支(codex/conversation-undo-plugin)仅作主树改动暂存,不进入插件。
+
 ## 交付状态:已完成并通过
 
 - **6 个包 + 1 个 vendored 依赖** 全部构建通过:
