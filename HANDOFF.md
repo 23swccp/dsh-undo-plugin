@@ -450,3 +450,27 @@ shell 解析 pnpm、原子写按错误码比较重试);仅两处 Windows-only,�
 - README 中英双语:加 CI 徽章;"Windows 注意"改为"平台支持"节;原子写
   描述修正(实为线性退避,非指数)。
 - 提交:`9b16895` 跨平台修复、`4bd9def` CI、本次文档更新。
+
+## 2026-08-19 会话:npm 版 dsh 安装实测,发现并修复 README 安装流程 bug
+
+在全新修复的 npm 全局 dsh(0.1.0-rc.6,旧安装的 commander 依赖损坏,卸载重装
+解决)上实测"全新用户按 README 安装":
+
+- **Bug**:README 原安装命令只 `dsh plugin add ./packages/bundle-rollback`。
+  pnpm 的 `link:` 协议不安装被链接 bundle 声明的依赖,而 dsh 加载器从 profile
+  的 node_modules 解析插件包名——五个插件包不在 profile node_modules,启动
+  直接 `ERR_MODULE_NOT_FOUND: Cannot find package '@dsh-rollback/rollback-fork'
+  imported from profiles/web`。旧 junction 装配能用,正是因为当时六个包
+  是逐个 link 的。
+- **修复**:README(中英)安装命令改为一条命令 link 全部六个包,并注明原因。
+- **验证**(npm 版 dsh + 新路径 Desktop\dsh-undo,工作区从 dsh-rollback-plugin
+  改名而来,无空格不再需要 junction):
+  - `dsh --profile web --dump-config`:5 个插件行从 bundle 层插入 ✓
+  - `dsh web` 启动 HTTP 200 ✓;`/plugins/@dsh-rollback/client-rollback-button/
+    client.js` 200(153KB)、client-rollback-settings 200(178KB)✓
+- **无害警告**:dump-config 报 patch 的 `ui-settings-archive` / `session-archive`
+  "entry not found"(npm rc.6 base 无这两个 id,disable 行为 no-op,不影响启动);
+  5 个插件包 add 时的 "declares no dsh.bundle" 警告亦为预期(只有 bundle 是
+  profile 层)。
+- 顺带:profile 里五个指向已删 junction 的孤儿链接已清理;桌面残留的
+  build-log/build-done 临时文件已删。

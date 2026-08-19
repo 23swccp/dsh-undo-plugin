@@ -52,8 +52,10 @@ git clone https://github.com/23swccp/dsh-undo.git
 cd dsh-undo
 pnpm install
 pnpm run build
-dsh plugin --profile web add ./packages/bundle-rollback
+dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/bundle-rollback
 ```
+
+六个包都要 link:pnpm 的 `link:` 协议不会安装被链接 bundle 的依赖,而 dsh 加载器从 profile 的 `node_modules` 解析插件包名,因此五个插件包需要与 bundle 一起各自 link。
 
 重启 dsh 后:会话头部出现"回滚"按钮,输入 `/undo` 可直接回滚;设置里出现"归档任务"页。
 

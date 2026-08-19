@@ -52,8 +52,10 @@ git clone https://github.com/23swccp/dsh-undo.git
 cd dsh-undo
 pnpm install
 pnpm run build
-dsh plugin --profile web add ./packages/bundle-rollback
+dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/bundle-rollback
 ```
+
+All six packages must be linked: pnpm's `link:` protocol does not install a linked bundle's dependencies, and the dsh loader resolves plugin package names from the profile's `node_modules`, so the five plugin packages need their own links next to the bundle.
 
 After restarting dsh: the session header gains the rollback button, `/undo` rolls back directly, and the Settings dialog gains the Archive Tasks page.
 
