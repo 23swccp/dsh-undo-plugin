@@ -405,3 +405,24 @@ dsh(link 安装加载的是构建产物 lib/,重启后生效)。
   不动 / 上游前进 HEAD 跟进 / 分叉克隆被 `--ff-only` 拒绝(不改写用户本地
   提交)。pluginWorkspaceRoot 在本仓库真实布局上断言成立。
 - 命令无后台自动更新;永远由用户显式发起,拒绝带参调用(返回用法文案)。
+
+## 2026-08-18/19 会话:GitHub 发布与文档收尾
+
+- **发布**:插件整体上传至 **https://github.com/23swccp/dsh-undo**(公开,
+  MIT,topics: dsh-plugin/deepseek/cordis/plugin/rollback;本地 origin 仍指
+  `23swccp/dsh-rollback-plugin`,两仓库同源同步)。README 展示名改为
+  **dsh-undo-plugin**,仓库与包名沿用历史 `rollback`,README 注记说明。
+- **本地路径迁移**:插件工作区已从 `Desktop\dsh 回滚\dsh-rollback-plugin`
+  独立为 `Desktop\dsh-rollback-plugin`(自包含,只依赖已发布 npm 包)。
+  旧的 `dsh-rb-link` junction 指向已失效;重新 link 安装需按新路径建
+  junction(仍需无空格路径)。
+- **README 三段式重构**(中英双语):大致介绍 / 具体功能 / 安装办法。
+  安装命令从占位符 `/path/to/...` 改为可复制的
+  `git clone https://github.com/23swccp/dsh-undo.git` 全流程。
+- **归档任务导航图标**(主树修复,非本插件):dsh `SettingsRoot.tsx` 的
+  `navIcon` 原来只认 {models, agent-presets, plugins},本插件注册的
+  `id: 'archive'` 落入 fallback 显示设置齿轮。主树改为 `NAV_ICONS` 查表
+  (防 vite tree-shake)并映射 `archive` → `IconArchiveOutline20`。本插件
+  以 `id: 'archive'` 注册 settings.section,主树修复后自动受益,无需改动。
+- **"暂时无法读取归档任务"误报**:server 停止后浏览器旧页面所有 RPC 失败,
+  归档页落到 `loadFailed` 兜底文案——不是数据 bug,重启 server 即恢复。
