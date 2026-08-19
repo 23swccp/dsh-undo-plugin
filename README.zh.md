@@ -2,6 +2,8 @@
 
 [English](README.md) | 中文
 
+[![CI](https://github.com/23swccp/dsh-undo/actions/workflows/ci.yml/badge.svg)](https://github.com/23swccp/dsh-undo/actions/workflows/ci.yml)
+
 ## 大致介绍
 
 [dsh-undo-plugin](https://github.com/23swccp/dsh-undo) 是 [DeepSeek Harness (dsh)](https://github.com/deepseek-ai/deepseek-harness) 的对话撤销插件:一句 `/undo` 就能把**工作区文件和对话一起**退回到最近一条已完成消息之前;被回滚的会话进入"设置 → 归档任务"统一管理(查看 / 恢复 / 永久删除 / 全部删除)。回滚错了也不要紧——输入框上方的"撤回回滚"折叠条可以完整恢复。
@@ -36,7 +38,7 @@
 ### 性能与可靠性
 - 7,400+ 文件工作区实测:**回滚 / 撤回各约 1 秒**(优化前感知 30–40s)
 - 关键优化:单次 `diff-tree` 路径限定 restore、`untrackedCache` + `splitIndex`、fork ∥ restore 并行、stat 预热 + 下一代 prearm
-- Windows 原子写入:`EPERM` / `EBUSY` / `EACCES` rename 指数退避重试 + 临时文件自动清理
+- Windows 原子写入:`EPERM` / `EBUSY` / `EACCES` rename 退避重试 + 临时文件自动清理
 
 ## 安装办法
 
@@ -62,8 +64,10 @@ dsh plugin --profile web add ./packages/bundle-rollback
 git pull && pnpm install && pnpm run build
 ```
 
-### Windows 注意
-从含空格的路径以 `link:` 安装会被 pnpm 拆分——请经由无空格的 junction 安装。
+### 平台支持
+插件可运行于 Windows、macOS 与 Linux;CI 在 `ubuntu-latest` / `macos-latest` / `windows-latest` 三平台验证安装、类型检查、测试与构建。
+
+仅 Windows:从含空格的路径以 `link:` 安装会被 pnpm 拆分——请经由无空格的 junction 安装。
 
 ## 包结构
 

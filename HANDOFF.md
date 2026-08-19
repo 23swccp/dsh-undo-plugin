@@ -426,3 +426,27 @@ dsh(link 安装加载的是构建产物 lib/,重启后生效)。
   以 `id: 'archive'` 注册 settings.section,主树修复后自动受益,无需改动。
 - **"暂时无法读取归档任务"误报**:server 停止后浏览器旧页面所有 RPC 失败,
   归档页落到 `loadFailed` 兜底文案——不是数据 bug,重启 server 即恢复。
+
+## 2026-08-19 会话:跨平台适配(macOS/Linux)与 CI 三平台矩阵
+
+用户要求插件适配 Windows 之外的环境。全仓库平台耦合审计:运行时核心本就
+平台无关(Shadow Git 管道命令走无 shell 的 spawn argv、`core.autocrlf false`
+锁死行尾、`node:path` `sep` 拼接、`/update` 经 `shell: true` 由各平台默认
+shell 解析 pnpm、原子写按错误码比较重试);仅两处 Windows-only,已修:
+
+1. **4 个开发脚本硬编码 Windows Chrome 路径**(`scripts/debug-browser.mjs`、
+   `e2e-fold.mjs`、`measure-fold.mjs`、`e2e-auto-navigate.mjs`):改为
+   `process.platform` 三平台默认值 + `CHROME` 环境变量覆盖(Linux 非
+   google-chrome 发行版用 `CHROME=` 指定)。
+2. **rollback-archive `writeDocument` 非原子写**(writeFile 直接覆盖,有写
+   半截 JSON 风险):补上与 shadow-git `writeJson` 对称的临时文件 + rename +
+   `EPERM/EBUSY/EACCES` 退避重试;依赖方向 undo→archive 单向,不能反向复用,
+   包内复制同模式。
+
+- **CI**(`.github/workflows/ci.yml`):push master / PR 触发
+  ubuntu/macos/windows 三平台矩阵跑 `pnpm install → typecheck → test →
+  build`(fail-fast 关闭);首跑三平台全绿(29s/40s/1m5s),无 POSIX 实机的
+  验证缺口就此补上。
+- README 中英双语:加 CI 徽章;"Windows 注意"改为"平台支持"节;原子写
+  描述修正(实为线性退避,非指数)。
+- 提交:`9b16895` 跨平台修复、`4bd9def` CI、本次文档更新。

@@ -2,6 +2,8 @@
 
 English | [中文](README.zh.md)
 
+[![CI](https://github.com/23swccp/dsh-undo/actions/workflows/ci.yml/badge.svg)](https://github.com/23swccp/dsh-undo/actions/workflows/ci.yml)
+
 ## Overview
 
 [dsh-undo-plugin](https://github.com/23swccp/dsh-undo) is a conversation-undo plugin for [DeepSeek Harness (dsh)](https://github.com/deepseek-ai/deepseek-harness): a single `/undo` rolls the **workspace files and the conversation together** back to before the latest completed message; rolled-back sessions land in "Settings → Archive Tasks" for management (view / restore / permanent delete / delete all). Made a mistake? The "revoke rollback" strip above the composer fully restores it.
@@ -36,7 +38,7 @@ The plugin ships as an **installable bundle**: a standalone workspace that never
 ### Performance and reliability
 - Measured on a ~7,400-file workspace: **rollback and revoke each complete in about a second** (previously 30–40 s perceived)
 - Key optimizations: single-`diff-tree` path-limited restore, `untrackedCache` + `splitIndex`, fork ∥ restore parallelism, stat warm-up plus next-generation prearm
-- Windows-friendly atomic writes: `EPERM` / `EBUSY` / `EACCES` renames retried with exponential backoff; failed temp files are cleaned up
+- Windows-friendly atomic writes: `EPERM` / `EBUSY` / `EACCES` renames retried with backoff; failed temp files are cleaned up
 
 ## Installation
 
@@ -62,8 +64,10 @@ Run `/update` in any session (requires a git-clone install), then restart dsh. M
 git pull && pnpm install && pnpm run build
 ```
 
-### Windows note
-`link:` installs from a path containing spaces get split by pnpm — install through a junction without spaces.
+### Platform support
+The plugin runs on Windows, macOS, and Linux; CI verifies install, typecheck, tests, and build on all three platforms (`ubuntu-latest` / `macos-latest` / `windows-latest`).
+
+Windows only: `link:` installs from a path containing spaces get split by pnpm — install through a junction without spaces.
 
 ## Package layout
 
