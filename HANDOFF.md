@@ -494,3 +494,32 @@ shell 解析 pnpm、原子写按错误码比较重试);仅两处 Windows-only,�
   位置 `Desktop\dsh`),无害残留——核心 @deepseek-ai/* 包解析走全局 dsh 安装,
   不经 profile;此前 rc.6 下能正常启动也印证了这点。
 - README 前置条件更新为 dsh `0.1.0-rc.6` / `0.1.0-rc.7`。
+
+## 2026-08-19 会话:归档任务导航图标改为插件侧修补(修复 npm dsh 下回退齿轮)
+
+用户报告:归档任务图标在 npm 版 dsh(rc.6→rc.7)下又变回设置齿轮。根因:NAV_ICONS
+修复(`b4b7072`)做在 fork 主树,只有从源码树启动才生效;npm 安装的 dsh 用上游
+`SettingsRoot`,其 `navIcon(id)` 仍是硬编码 if-chain(models / agent-presets /
+plugins 之外全 fallback 齿轮),而 `settings.section` 注册接口没有 icon 字段
+——插件无法通过注册声明图标。
+
+**实现(client-rollback-settings,新增 `src/client/navIconPatch.tsx`)**:
+浏览器端 MutationObserver 修补——设置面板挂载/重渲染后,按 label 文本匹配本插件
+的 nav 行,把 `IconArchiveOutline20`(宿主模块表 external)渲染出的 svg 克隆插到
+齿轮前,齿轮 `display:none` 保留(节点不删)。**关键教训:React 管理的子树里
+不能用 replaceWith 删节点**——v1 直接替换齿轮,实测把该行 label 破坏成空字符串
+(React diff 假设失效);v2 只隐藏+插入外来节点,React diff 不碰,label 正常。
+locale 变化由 observer 幂等重扫覆盖(`data-nav-icon` 标记防重复)。
+
+- 依赖:`@deepseek-ai/dsh-client-ui-primitives` 补进 peer/dev(externals 表已有);
+  `@types/react-dom` 补 dev;`react-dom/client` + `flushSync`(模板同步渲染)。
+- **验证**(npm dsh rc.7 + dshmarket 1.15.0 共存环境):puppeteer 打开设置面板,
+  6 行 nav 中仅"归档任务"行 `data-nav-icon=dshArchiveNavIcon`、label 完好、
+  克隆 svg 带 navIcon class;通用/模型/插件/Agent 预设/插件市场行未受影响。
+- 新增测试 `tests/navIconPatch.client.spec.tsx`(4 例:匹配行才修/幂等/后挂载
+  行由 observer 补上/无匹配不动);primitives 在测试里 mock(其入口 import
+  katex CSS,node 加载不了)。settings 包 10/10,typecheck/构建通过。
+- **已知环境问题(非本次改动)**:rollback-undo 的 4 个真实 git 测试
+  (shadow-git×2、update×2)本机稳定超时 30s + EBUSY——stash 对照实验证明与
+  本次改动无关(不 stash 同样失败);Defender/索引器锁 Temp 目录所致,CI
+  (ubuntu/macos/windows 隔离环境)为准。

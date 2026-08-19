@@ -9,6 +9,7 @@ import type {} from '@dsh-rollback/rollback-archive/remote'
 import TYPERT_UNDO_REMOTE from '@dsh-rollback/rollback-undo/remote'
 import type {} from '@dsh-rollback/rollback-undo/remote'
 import { ArchiveSettingsSection, type ArchiveSettingsInjected } from './ArchiveSettingsSection.tsx'
+import { mountArchiveNavIconPatch } from './navIconPatch.tsx'
 import { en, zh, type ArchiveSettingsKey } from './locales.ts'
 
 export type { ArchiveSettingsInjected, ArchiveSettingsProps } from './ArchiveSettingsSection.tsx'
@@ -99,6 +100,9 @@ export async function apply(ctx: ClientContext): Promise<() => void> {
       return carried.value
     },
   })
+  // The shell hardcodes nav glyphs by section id; patch ours after the
+  // registration below supplies the label the nav row will carry.
+  const disposeNavIcon = mountArchiveNavIconPatch(() => t('nav'))
   const disposeRegistration = ctx.slots.inject('settings.section', () => ctx.slots.register({
     name: 'settings.section',
     id: 'archive',
@@ -109,6 +113,7 @@ export async function apply(ctx: ClientContext): Promise<() => void> {
   }, ArchiveSettingsSection))
 
   return () => {
+    disposeNavIcon()
     disposeRegistration()
     disposeLocale()
     void disposeArchive()
