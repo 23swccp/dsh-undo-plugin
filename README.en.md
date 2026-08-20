@@ -20,6 +20,8 @@ The plugin ships as an **installable bundle**: a standalone workspace that never
 - The old Session is archived automatically (it leaves the sidebar) and the UI navigates to the child Session
 - Snapshots are captured at `agent/pre-step`; a capture failure rejects the step (the model never receives the prompt) and refills the composer draft with the original prompt plus a redacted reason
 <img width="1114" height="682" alt="Conversation with the rollback entry points" src="https://github.com/user-attachments/assets/f27676a4-b844-491c-9686-668bb4a55d7c" />
+You can also click the rollback icon under a sent prompt to roll back directly.
+<img width="713" height="309" alt="The message-level rollback icon button under a user prompt" src="https://github.com/user-attachments/assets/80c348a2-fc42-4530-9b39-2b73e1039a8c" />
 
 ### Revoke rollback
 - The `↩ 已回滚 <preview> [撤回回滚]` strip appears only after a rollback and disappears once a new prompt is accepted
