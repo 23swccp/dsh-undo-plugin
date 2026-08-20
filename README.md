@@ -19,34 +19,40 @@ The plugin ships as an **installable bundle**: a standalone workspace that never
 - The file tree is restored from a private Shadow Git snapshot; the conversation is forked into a new Session whose seed is the complete event prefix *before* the target message — the model never sees the reverted prompt, reply, or tool calls
 - The old Session is archived automatically (it leaves the sidebar) and the UI navigates to the child Session
 - Snapshots are captured at `agent/pre-step`; a capture failure rejects the step (the model never receives the prompt) and refills the composer draft with the original prompt plus a redacted reason
+<img width="1114" height="682" alt="Conversation with the rollback entry points" src="https://github.com/user-attachments/assets/f27676a4-b844-491c-9686-668bb4a55d7c" />
 
 ### Revoke rollback
 - The `↩ 已回滚 <preview> [撤回回滚]` strip appears only after a rollback and disappears once a new prompt is accepted
 - A full reverse transaction: it first verifies the workspace is untouched (a diverged workspace is refused with `workspace-diverged`, never overwritten), then restores the source Session and files, and re-arms the rollback point — rollback and revoke are symmetric and repeatable
 - `restoring` / `revoking` journal phases are recovered deterministically on startup
+<img width="1220" height="387" alt="The revoke-rollback strip above the composer" src="https://github.com/user-attachments/assets/faf026a0-97d0-4f56-82a2-acbae0a09e1e" />
 
 ### Archive tasks (Settings → Archive Tasks)
 - Lists every archived Session (title / archived time / created time / workspace) with a read-only transcript viewer
 - **Restore**: fork an archived conversation back as a new Session (repeatable; the archive entry is kept)
 - **Delete**: permanently removes the session's on-disk log directory; busy agents are cancelled and awaited idle first
 - **Delete all**: one batch RPC with a double-confirm dialog; partial failures report "deleted X, Y failed"
+<img width="987" height="837" alt="Archive tasks settings page" src="https://github.com/user-attachments/assets/3ea2b7a0-9507-45c5-a236-4c4dae9a88da" />
 
 ### Reasoning-and-actions fold
 - Every prompt turn gets its own "reasoning & actions" collapse bar: the turn's Think steps, intermediate narration, context injections, and all tool calls fold away together; **the final conclusion and the stats row never fold**
 - A running turn shows a "running" hint and stays expanded; once it closes while the view is following at the bottom it auto-collapses; manual clicks always override
 - Turns without a conclusion (e.g. ending on a failing tool call) never fold — errors stay visible; history loads expanded
 - Pure CSS/DOM injection keyed on the renderer's stable `data-chat-flow-kind` boundaries (user / assistant-step / tool-call / turn-tail); React-owned node structure is never touched
+<img width="887" height="293" alt="The per-turn reasoning-and-actions fold bar" src="https://github.com/user-attachments/assets/7ffde842-b5a8-41e8-9361-8e7411c669f8" />
 
 ### Tool card colors
 - Every expanded tool-call card in a conversation is tinted by tool type: the **bash terminal card stays near-black** (kept dark even under the light theme), the **pwsh terminal card gets the PowerShell-window blue**, and the rest carry theme-coordinated tints (edit green / read violet / search blue / web teal / code amber)
 - Pure CSS injection keyed on the stable `data-*` hooks the stock renderer already publishes (`data-tool`, `data-terminal`, `data-diff`, …) — no hashed class names, React re-renders re-apply automatically
+<img width="1025" height="655" alt="Tool-call cards colored per tool type" src="https://github.com/user-attachments/assets/6aac899b-d6c7-449b-83b8-a4b904b5c932" />
 
 ### Self-update
 - `/update` in any session runs `git pull --ff-only` → `pnpm install` → `pnpm run build` in one pass (per-step timeouts; skips install/build when already up to date); restart dsh to activate
 - No background auto-update — updating always starts from an explicit user action; `--ff-only` never rewrites local commits
+<img width="1058" height="225" alt="The /update command output" src="https://github.com/user-attachments/assets/66ee5ddc-6d84-4caf-acd6-fa42900d4658" />
 
 ### Performance and reliability
-- Measured on a ~7,400-file workspace: **rollback and revoke each complete in about a second** (previously 30–40 s perceived)
+- Measured on a ~7,400-file workspace: **rollback and revoke each complete in about 500 ms** (previously 30–40 s perceived)
 - Key optimizations: single-`diff-tree` path-limited restore, `untrackedCache` + `splitIndex`, fork ∥ restore parallelism, stat warm-up plus next-generation prearm
 - Windows-friendly atomic writes: `EPERM` / `EBUSY` / `EACCES` renames retried with backoff; failed temp files are cleaned up
 
