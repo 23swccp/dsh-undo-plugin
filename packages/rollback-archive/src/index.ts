@@ -4,7 +4,7 @@
  * deletion are intentionally absent — dsh publishes no unarchive or
  * delete/removeImage API, so this plugin degrades those original-spec
  * operations to a plugin-owned tombstone list.
- * @module @dsh-rollback/rollback-archive
+ * @module @dsh-undo/rollback-archive
  */
 
 import { randomBytes } from 'node:crypto'
@@ -22,7 +22,7 @@ import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import type {} from '@deepseek-ai/dsh-agent'
 import type {} from '@deepseek-ai/dsh-workspace'
-import type {} from '@dsh-rollback/rollback-fork'
+import type {} from '@dsh-undo/rollback-fork'
 import type {
   ArchivedSessionItem,
   ArchivedSessionReadValue,

@@ -3,7 +3,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@dsh-rollback/client-rollback-button'
+const PACKAGE_NAME = '@dsh-undo/client-rollback-button'
 
 /** Cordis companion plugin name. */
 export const name = 'client-rollback-button-invariant'

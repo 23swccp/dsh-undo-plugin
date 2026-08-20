@@ -8,7 +8,7 @@ import type {
   ConversationRevokePairValue,
   ConversationUndoResult,
   ConversationUndoValue,
-} from '@dsh-rollback/rollback-undo/types'
+} from '@dsh-undo/rollback-undo/types'
 
 /** The mounted Remote methods used by this browser package. */
 export interface ConversationUndoRemote {

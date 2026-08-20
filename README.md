@@ -67,6 +67,13 @@
 
 ### 安装
 ```sh
+dsh plugin --profile web add dsh-undo-plugin
+```
+
+一行即可:入口包 `dsh-undo-plugin` 发布在 npm,七个内部包(`@dsh-undo/*`)作为其依赖自动安装。
+
+#### 从源码安装(开发者)
+```sh
 git clone https://github.com/23swccp/dsh-undo.git
 cd dsh-undo
 pnpm install
@@ -74,12 +81,12 @@ pnpm run build
 dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/client-rollback-toolcards ./packages/client-rollback-trailfold ./packages/bundle-rollback
 ```
 
-八个包都要 link:pnpm 的 `link:` 协议不会安装被链接 bundle 的依赖,而 dsh 加载器从 profile 的 `node_modules` 解析插件包名,因此七个插件包需要与 bundle 一起各自 link。
+源码安装时八个包都要 link:pnpm 的 `link:` 协议不会安装被链接 bundle 的依赖,而 dsh 加载器从 profile 的 `node_modules` 解析插件包名,因此七个插件包需要与 bundle 一起各自 link。
 
 重启 dsh 后:会话头部出现"回滚"按钮,输入 `/undo` 可直接回滚;设置里出现"归档任务"页;每回合出现「推理与行动」折叠条;工具调用展开卡片按工具类型着色。
 
 ### 更新
-在任意会话执行 `/update`(要求以 git clone 方式安装),完成后重启 dsh。手动等价:
+npm 安装的用户执行 `dsh plugin --profile web update dsh-undo-plugin` 后重启 dsh。源码(git clone)安装的用户在任意会话执行 `/update`,完成后重启 dsh。手动等价:
 
 ```sh
 git pull && pnpm install && pnpm run build
@@ -87,6 +94,8 @@ git pull && pnpm install && pnpm run build
 
 
 ## 包结构
+
+npm 入口包为 `dsh-undo-plugin`(即 `packages/bundle-rollback`),内部包发布为 `@dsh-undo/*`:
 
 | 包 | 职责 |
 |---|---|

@@ -1,9 +1,20 @@
 {
-  "name": "@dsh-rollback/rollback-archive",
+  "name": "@dsh-undo/rollback-archive",
   "description": "Session archive capability: one-way archive listing, read-only viewing, and tombstone hiding",
   "version": "0.1.0-rc.6",
-  "private": true,
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/23swccp/dsh-undo.git",
+    "directory": "packages/rollback-archive"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness"
+  ],
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "exports": {
@@ -30,7 +41,7 @@
     "@deepseek-ai/dsh-session-title": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-typert-protocol": "workspace:^",
     "@deepseek-ai/dsh-workspace": "^0.1.0-rc.6",
-    "@dsh-rollback/rollback-fork": "^0.1.0-rc.6"
+    "@dsh-undo/rollback-fork": "^0.1.0-rc.6"
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.1",
@@ -48,6 +59,6 @@
     "@deepseek-ai/dsh-typert-generator": "^0.1.0-rc.6",
     "@deepseek-ai/dsh-typert-protocol": "workspace:^",
     "@deepseek-ai/dsh-workspace": "^0.1.0-rc.6",
-    "@dsh-rollback/rollback-fork": "^0.1.0-rc.6"
+    "@dsh-undo/rollback-fork": "^0.1.0-rc.6"
   }
 }

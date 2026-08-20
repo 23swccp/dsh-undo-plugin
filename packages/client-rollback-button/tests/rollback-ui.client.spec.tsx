@@ -1,10 +1,10 @@
-﻿// @vitest-environment jsdom
+// @vitest-environment jsdom
 import { useSyncExternalStore } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import type { MessageId } from '@deepseek-ai/dsh-client-connection/client'
 import type { SessionId } from '@deepseek-ai/dsh-client-runtime/client'
-import type { ConversationAdmissionFailureValue } from '@dsh-rollback/rollback-undo/types'
+import type { ConversationAdmissionFailureValue } from '@dsh-undo/rollback-undo/types'
 import { RollbackFold } from '../src/client/RollbackFold.tsx'
 import { RollbackHeaderAction } from '../src/client/RollbackHeaderAction.tsx'
 import type { ConversationUndoView } from '../src/client/controller.ts'

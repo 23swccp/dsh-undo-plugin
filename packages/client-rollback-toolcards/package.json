@@ -1,9 +1,20 @@
 {
-  "name": "@dsh-rollback/client-rollback-toolcards",
+  "name": "@dsh-undo/client-rollback-toolcards",
   "description": "Per-tool background colors for the dsh web conversation tool cards (bash black, pwsh blue, tinted edit/read/search/web/code)",
   "version": "0.1.0-rc.6",
-  "private": true,
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/23swccp/dsh-undo.git",
+    "directory": "packages/client-rollback-toolcards"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness"
+  ],
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "exports": {

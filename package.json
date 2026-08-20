@@ -1,17 +1,17 @@
 {
-    "name": "dsh-rollback-plugin",
+    "name": "dsh-undo",
     "version": "0.1.0-rc.6",
     "private": true,
     "type": "module",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/23swccp/dsh-rollback-plugin.git"
+        "url": "git+https://github.com/23swccp/dsh-undo.git"
     },
     "bugs": {
-        "url": "https://github.com/23swccp/dsh-rollback-plugin/issues"
+        "url": "https://github.com/23swccp/dsh-undo/issues"
     },
-    "homepage": "https://github.com/23swccp/dsh-rollback-plugin#readme",
+    "homepage": "https://github.com/23swccp/dsh-undo#readme",
     "packageManager": "pnpm@11.7.0",
     "engines": {
         "node": "^22.19.0 || >=24.0.0"

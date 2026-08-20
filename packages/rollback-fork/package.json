@@ -1,9 +1,20 @@
 {
-  "name": "@dsh-rollback/rollback-fork",
+  "name": "@dsh-undo/rollback-fork",
   "description": "Session fork capability: exact completed-turn and before-user-message Agent branches",
   "version": "0.1.0-rc.6",
-  "private": true,
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/23swccp/dsh-undo.git",
+    "directory": "packages/rollback-fork"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness"
+  ],
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "exports": {

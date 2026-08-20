@@ -1,6 +1,6 @@
 /**
  * Session fork capability: construct an Agent from an exact, completed Session prefix (standalone rollback plugin fork).
- * @module @dsh-rollback/rollback-fork
+ * @module @dsh-undo/rollback-fork
  */
 
 import { randomUUID } from 'node:crypto'

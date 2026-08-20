@@ -1,9 +1,25 @@
 {
-  "name": "@dsh-rollback/bundle-rollback",
-  "description": "Installable dsh bundle: conversation rollback and archive tasks",
+  "name": "dsh-undo-plugin",
+  "description": "dsh plugin: conversation undo/rollback and archive tasks for DeepSeek Harness",
   "version": "0.1.0-rc.6",
-  "private": true,
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/23swccp/dsh-undo.git",
+    "directory": "packages/bundle-rollback"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "plugin",
+    "undo",
+    "rollback",
+    "session"
+  ],
   "files": ["cordis.patch.yml"],
   "license": "MIT",
   "dsh": {
@@ -12,12 +28,12 @@
     }
   },
   "dependencies": {
-    "@dsh-rollback/client-rollback-button": "^0.1.0-rc.6",
-    "@dsh-rollback/client-rollback-settings": "^0.1.0-rc.6",
-    "@dsh-rollback/client-rollback-toolcards": "^0.1.0-rc.6",
-    "@dsh-rollback/client-rollback-trailfold": "^0.1.0-rc.6",
-    "@dsh-rollback/rollback-archive": "^0.1.0-rc.6",
-    "@dsh-rollback/rollback-fork": "^0.1.0-rc.6",
-    "@dsh-rollback/rollback-undo": "^0.1.0-rc.6"
+    "@dsh-undo/client-rollback-button": "^0.1.0-rc.6",
+    "@dsh-undo/client-rollback-settings": "^0.1.0-rc.6",
+    "@dsh-undo/client-rollback-toolcards": "^0.1.0-rc.6",
+    "@dsh-undo/client-rollback-trailfold": "^0.1.0-rc.6",
+    "@dsh-undo/rollback-archive": "^0.1.0-rc.6",
+    "@dsh-undo/rollback-fork": "^0.1.0-rc.6",
+    "@dsh-undo/rollback-undo": "^0.1.0-rc.6"
   }
 }

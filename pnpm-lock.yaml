@@ -6,13 +6,13 @@ settings:
 
 overrides:
   '@deepseek-ai/dsh-typert-protocol': workspace:^
-  '@dsh-rollback/rollback-fork': workspace:^
-  '@dsh-rollback/rollback-archive': workspace:^
-  '@dsh-rollback/rollback-undo': workspace:^
-  '@dsh-rollback/client-rollback-button': workspace:^
-  '@dsh-rollback/client-rollback-settings': workspace:^
-  '@dsh-rollback/client-rollback-toolcards': workspace:^
-  '@dsh-rollback/client-rollback-trailfold': workspace:^
+  '@dsh-undo/rollback-fork': workspace:^
+  '@dsh-undo/rollback-archive': workspace:^
+  '@dsh-undo/rollback-undo': workspace:^
+  '@dsh-undo/client-rollback-button': workspace:^
+  '@dsh-undo/client-rollback-settings': workspace:^
+  '@dsh-undo/client-rollback-toolcards': workspace:^
+  '@dsh-undo/client-rollback-trailfold': workspace:^
 
 patchedDependencies:
   '@deepseek-ai/dsh-typert-generator@0.1.0-rc.6': 37727cde179f763df87ecac44b9968cc191cb0a85d1fe17abb8bd69797d812df
@@ -69,25 +69,25 @@ importers:
 
   packages/bundle-rollback:
     dependencies:
-      '@dsh-rollback/client-rollback-button':
+      '@dsh-undo/client-rollback-button':
         specifier: workspace:^
         version: link:../client-rollback-button
-      '@dsh-rollback/client-rollback-settings':
+      '@dsh-undo/client-rollback-settings':
         specifier: workspace:^
         version: link:../client-rollback-settings
-      '@dsh-rollback/client-rollback-toolcards':
+      '@dsh-undo/client-rollback-toolcards':
         specifier: workspace:^
         version: link:../client-rollback-toolcards
-      '@dsh-rollback/client-rollback-trailfold':
+      '@dsh-undo/client-rollback-trailfold':
         specifier: workspace:^
         version: link:../client-rollback-trailfold
-      '@dsh-rollback/rollback-archive':
+      '@dsh-undo/rollback-archive':
         specifier: workspace:^
         version: link:../rollback-archive
-      '@dsh-rollback/rollback-fork':
+      '@dsh-undo/rollback-fork':
         specifier: workspace:^
         version: link:../rollback-fork
-      '@dsh-rollback/rollback-undo':
+      '@dsh-undo/rollback-undo':
         specifier: workspace:^
         version: link:../rollback-undo
 
@@ -121,7 +121,7 @@ importers:
       '@deepseek-ai/dsh-typert-protocol':
         specifier: workspace:^
         version: link:../typert-protocol
-      '@dsh-rollback/rollback-undo':
+      '@dsh-undo/rollback-undo':
         specifier: workspace:^
         version: link:../rollback-undo
       '@testing-library/react':
@@ -167,10 +167,10 @@ importers:
       '@deepseek-ai/dsh-invariants':
         specifier: ^0.1.0-rc.6
         version: 0.1.0-rc.6(@deepseek-ai/cordis@4.0.1)
-      '@dsh-rollback/rollback-archive':
+      '@dsh-undo/rollback-archive':
         specifier: workspace:^
         version: link:../rollback-archive
-      '@dsh-rollback/rollback-undo':
+      '@dsh-undo/rollback-undo':
         specifier: workspace:^
         version: link:../rollback-undo
       '@testing-library/react':
@@ -249,7 +249,7 @@ importers:
       '@deepseek-ai/dsh-workspace':
         specifier: ^0.1.0-rc.6
         version: 0.1.0-rc.6(31152a7d476be205f81e46181ea55abd)
-      '@dsh-rollback/rollback-fork':
+      '@dsh-undo/rollback-fork':
         specifier: workspace:^
         version: link:../rollback-fork
 
@@ -337,10 +337,10 @@ importers:
       '@deepseek-ai/dsh-workspace':
         specifier: ^0.1.0-rc.6
         version: 0.1.0-rc.6(31152a7d476be205f81e46181ea55abd)
-      '@dsh-rollback/rollback-archive':
+      '@dsh-undo/rollback-archive':
         specifier: workspace:^
         version: link:../rollback-archive
-      '@dsh-rollback/rollback-fork':
+      '@dsh-undo/rollback-fork':
         specifier: workspace:^
         version: link:../rollback-fork
 

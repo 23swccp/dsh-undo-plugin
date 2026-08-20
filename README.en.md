@@ -66,6 +66,13 @@ You can also click the rollback icon under a sent prompt to roll back directly.
 
 ### Install
 ```sh
+dsh plugin --profile web add dsh-undo-plugin
+```
+
+That single line is enough: the entry package `dsh-undo-plugin` is published on npm, and the seven internal packages (`@dsh-undo/*`) install automatically as its dependencies.
+
+#### Install from source (developers)
+```sh
 git clone https://github.com/23swccp/dsh-undo.git
 cd dsh-undo
 pnpm install
@@ -73,12 +80,12 @@ pnpm run build
 dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/client-rollback-toolcards ./packages/client-rollback-trailfold ./packages/bundle-rollback
 ```
 
-All eight packages must be linked: pnpm's `link:` protocol does not install a linked bundle's dependencies, and the dsh loader resolves plugin package names from the profile's `node_modules`, so the seven plugin packages need their own links next to the bundle.
+When installing from source all eight packages must be linked: pnpm's `link:` protocol does not install a linked bundle's dependencies, and the dsh loader resolves plugin package names from the profile's `node_modules`, so the seven plugin packages need their own links next to the bundle.
 
 After restarting dsh: the session header gains the rollback button, `/undo` rolls back directly, the Settings dialog gains the Archive Tasks page, every turn gains the reasoning-and-actions fold bar, and expanded tool-call cards are colored per tool type.
 
 ### Update
-Run `/update` in any session (requires a git-clone install), then restart dsh. Manual equivalent:
+npm installs: run `dsh plugin --profile web update dsh-undo-plugin`, then restart dsh. Git-clone installs: run `/update` in any session, then restart dsh. Manual equivalent:
 
 ```sh
 git pull && pnpm install && pnpm run build
@@ -86,6 +93,8 @@ git pull && pnpm install && pnpm run build
 
 
 ## Package layout
+
+The npm entry package is `dsh-undo-plugin` (`packages/bundle-rollback`); the internal packages are published as `@dsh-undo/*`:
 
 | Package | Role |
 |---|---|

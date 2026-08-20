@@ -49,7 +49,7 @@ const VENDORED_LIBRARY = /^@deepseek-ai\/(cosmokit|schemastery)(\/|$)/
  * both the dsh generated /remote faces and this plugin's own generated
  * rollback /remote faces inline into the bundle.
  */
-const GENERATED_REMOTE = /^(@deepseek-ai\/dsh-[a-z0-9]+(?:-[a-z0-9]+)*|@dsh-rollback\/rollback-(?:undo|archive))\/remote$/
+const GENERATED_REMOTE = /^(@deepseek-ai\/dsh-[a-z0-9]+(?:-[a-z0-9]+)*|@dsh-undo\/rollback-(?:undo|archive))\/remote$/
 
 /**
  * Workspace mode replaces an empty config array with the root defaults. A
@@ -151,7 +151,7 @@ function clientConfig(id: string, entry: string): UserConfig {
     plugins: [{
       name: 'dsh-client-bundle-purity',
       resolveId(source: string) {
-        if (!source.startsWith('@deepseek-ai/') && !source.startsWith('@dsh-rollback/')) return null
+        if (!source.startsWith('@deepseek-ai/') && !source.startsWith('@dsh-undo/')) return null
         if (CLIENT_EXTERNALS.includes(source)) return null
         if (VENDORED_LIBRARY.test(source)) return null
         if (INLINE_SAFE.test(source) || GENERATED_REMOTE.test(source)) return null

@@ -1,12 +1,12 @@
 /**
- * Package-owned invariant companion for `@dsh-rollback/rollback-fork`.
- * @module @dsh-rollback/rollback-fork/invariant
+ * Package-owned invariant companion for `@dsh-undo/rollback-fork`.
+ * @module @dsh-undo/rollback-fork/invariant
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@dsh-rollback/rollback-fork'
+const PACKAGE_NAME = '@dsh-undo/rollback-fork'
 
 /** Cordis companion plugin name. */
 export const name = 'rollback-fork-invariant'

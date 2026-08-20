@@ -5,8 +5,8 @@ import type {
   ArchivedSessionItem,
   ArchivedSessionReadValue,
   SessionArchiveListValue,
-} from '@dsh-rollback/rollback-archive/types'
-import type { ConversationArchiveActionValue } from '@dsh-rollback/rollback-undo/types'
+} from '@dsh-undo/rollback-archive/types'
+import type { ConversationArchiveActionValue } from '@dsh-undo/rollback-undo/types'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ArchiveSettingsKey } from './locales.ts'
 import css from './ArchiveSettingsSection.module.css'

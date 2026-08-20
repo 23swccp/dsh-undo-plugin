@@ -6,7 +6,7 @@
  * cancellation plus quiescence waiting replaces forced termination, tombstone
  * hiding replaces permanent deletion, and unarchive-based undo restoration is
  * dropped entirely.
- * @module @dsh-rollback/rollback-undo
+ * @module @dsh-undo/rollback-undo
  */
 
 import { createHash, randomUUID } from 'node:crypto'
@@ -19,8 +19,8 @@ import type { CommandInvocation, CommandResult } from '@deepseek-ai/dsh-commands
 import type {} from '@deepseek-ai/dsh-jobs'
 import type { UserMessage } from '@deepseek-ai/dsh-llm'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type {} from '@dsh-rollback/rollback-archive'
-import type {} from '@dsh-rollback/rollback-fork'
+import type {} from '@dsh-undo/rollback-archive'
+import type {} from '@dsh-undo/rollback-fork'
 import type {} from '@deepseek-ai/dsh-session-persistence'
 import type {} from '@deepseek-ai/dsh-terminal'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
@@ -117,7 +117,7 @@ export class ConversationUndoService extends TypertRemoteService {
     })
     this.ctx.commands.register({
       name: 'update',
-      description: '更新 dsh-rollback-plugin:拉取最新代码并重新构建(重启 dsh 后生效)',
+      description: '更新 dsh-undo-plugin:拉取最新代码并重新构建(重启 dsh 后生效)',
       handler: invocation => this.updateCommand(invocation),
     })
   }
@@ -128,7 +128,7 @@ export class ConversationUndoService extends TypertRemoteService {
    */
   private async updateCommand(invocation: CommandInvocation): Promise<CommandResult> {
     if (invocation.rawInput.trim().length > 0) {
-      return { kind: 'error', text: '更新 dsh-rollback-plugin:拉取最新代码并重新构建(重启 dsh 后生效)' }
+      return { kind: 'error', text: '更新 dsh-undo-plugin:拉取最新代码并重新构建(重启 dsh 后生效)' }
     }
     try {
       return { kind: 'success', text: await performPluginUpdate(pluginWorkspaceRoot()) }

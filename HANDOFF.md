@@ -753,3 +753,48 @@ Running)负责拉起。2026-08-19 起的「4 个 shadow-git/update 测试稳定
 `scripts/timing-spawn.mjs`(机器健康检查:spawn 是否又变慢)。
 **经验**:机器整体变慢(git/测试/e2e 同时劣化)时,先测
 `timing-spawn.mjs` 排除第三方进程干扰,再怀疑代码。
+
+## 2026-08-20 会话:npm 发布准备(包改名 dsh-undo-plugin + @dsh-undo/*)
+
+用户决定将插件上架 dsh 插件市场;多包仓库的 `link:` 安装方式对市场
+用户不可用,改为发布 npm。**命名**:npm 上 `dsh-undo` 已被
+LingLambda 的另一个 /undo /redo 插件占用(v0.2.0),故定:
+**入口包 `dsh-undo-plugin`(无 scope),内部 7 包 `@dsh-undo/*`,
+根包 `dsh-undo`(private)**。`@dsh-undo` scope 现无人使用(404)。
+
+**改动**(机械替换 `@dsh-rollback/` → `@dsh-undo/` 共 44 文件 +
+手工修正):
+- 8 个包 package.json:改包名、去 `private`、加 `publishConfig.access
+  = public` + `repository`(带 directory)+ `keywords`;入口包补
+  `packages/bundle-rollback/README.md`(npm 页面用)。
+- `typert-protocol` 保持 private(dev 期 override,vendored
+  `@deepseek-ai/dsh-typert-protocol`)。它的 `workspace:^` peerDep
+  在 pack/publish 时被 pnpm 替换为 `^0.1.0-rc.6`——npm 上该包真实
+  存在同版本,终端用户可解析(已验证)。
+- **坑 1**:正则里的转义斜杠 `@dsh-rollback\/rollback-` 不被字符串
+  替换命中,`scripts/tsdown.client.ts` 的 GENERATED_REMOTE 白名单
+  漏改 → client 构建报 bundle purity 错误;手工修。
+- **坑 2**:替换脚本曾误入 `packages/*/node_modules`(pnpm 联接
+  镜像,幂等无害);`pnpm install` 后按新名重建。
+- `/update` 命令文案、`cordis.patch.yml` 注释、两份 README 安装段
+  (npm 一行 `dsh plugin --profile web add dsh-undo-plugin` + 源码
+  安装保留)同步更新;`data-dsh-rollback-message-action` DOM 标记
+  为内部约定(代码/测试/edge 脚本三处一致),刻意保留。
+
+**验证**:`pnpm install --no-frozen-lockfile`(overrides 改名需重生成
+lockfile)→ typecheck ✓ → build ✓ → test 12 文件 65 用例全绿 ✓;
+`pnpm pack` 8 包逐一解包验证:无 private、无 `workspace:` 残留、
+files 无越界、入口包 deps 全部 `@dsh-undo/*`。
+**profile 迁移**:`dsh plugin --profile web remove` 旧 8 名 →
+`add` 本地 8 路径;bundles 列表变为 `dsh-undo-plugin`;重启
+dsh web(3080)后 `/plugins/@dsh-undo/*/client.js` 200、旧名 404。
+
+**发布操作(用户执行,尚未做)**:
+1. npmjs.com 注册账号 + 创建免费组织 `dsh-undo` + `npm login`;
+2. 依序发布(被依赖者先行):`rollback-fork` → `rollback-archive` →
+   `rollback-undo` → 4 个 `client-rollback-*` → `dsh-undo-plugin`,
+   命令 `pnpm --filter <包名> publish --access public`(根目录);
+3. 发布后 marketplace(`dshmarket`)搜索 `dsh-undo-plugin` 验证
+   一键安装;向 awesome-dsh-plugin 仓库提 PR(需 English 描述 +
+   `dsh plugin add dsh-undo-plugin` 可复现)。
+

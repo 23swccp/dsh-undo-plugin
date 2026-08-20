@@ -87,7 +87,7 @@ const report = await page.evaluate(async () => {
       labelVar: cs.getPropertyValue('--dsw-alias-label-primary').trim(),
     })
   }
-  const pluginTag = document.querySelector('style[data-plugin="@dsh-rollback/client-rollback-toolcards"]')
+  const pluginTag = document.querySelector('style[data-plugin="@dsh-undo/client-rollback-toolcards"]')
   return { pluginStyleLoaded: pluginTag !== null, cards: seen }
 })
 console.log('plugin style tag loaded:', report.pluginStyleLoaded)

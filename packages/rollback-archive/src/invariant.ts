@@ -1,12 +1,12 @@
 /**
- * Package-owned invariant companion for `@dsh-rollback/rollback-archive`.
- * @module @dsh-rollback/rollback-archive/invariant
+ * Package-owned invariant companion for `@dsh-undo/rollback-archive`.
+ * @module @dsh-undo/rollback-archive/invariant
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@dsh-rollback/rollback-archive'
+const PACKAGE_NAME = '@dsh-undo/rollback-archive'
 
 /** Cordis companion plugin name. */
 export const name = 'rollback-archive-invariant'
