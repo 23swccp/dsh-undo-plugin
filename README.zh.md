@@ -20,34 +20,40 @@
 - 文件树从私有 Shadow Git 快照恢复;对话 fork 成新会话(seed 是目标消息**之前**的完整事件前缀——模型永远看不到被回滚的提示词、回复与工具调用)
 - 旧会话自动归档并从侧边栏消失,UI 自动切换到新会话
 - 快照在 `agent/pre-step` 捕获;失败会拒绝该步骤(模型不收 prompt),并把原提示词与脱敏原因回填输入框
+<img width="1114" height="682" alt="屏幕截图 2026-08-20 102749" src="https://github.com/user-attachments/assets/f27676a4-b844-491c-9686-668bb4a55d7c" />
 
 ### 撤回回滚
 - 仅在回滚后出现 `↩ 已回滚 <预览> [撤回回滚]` 折叠条,新 prompt 接纳后自动消失
 - 完整反向事务:先校验工作区未被改动(已分叉则拒绝 `workspace-diverged`,不覆盖你的修改)→ 恢复源会话与文件 → 重新武装回滚点;回滚与撤回对称、可重复
 - `restoring` / `revoking` 相位 journal 在启动时按磁盘证据确定性恢复
+<img width="1220" height="387" alt="屏幕截图 2026-08-20 102819" src="https://github.com/user-attachments/assets/faf026a0-97d0-4f56-82a2-acbae0a09e1e" />
 
 ### 归档任务(设置 → 归档任务)
 - 列出全部归档会话(标题 / 归档时间 / 创建时间 / 工作区),支持只读查看
 - **恢复**:把归档对话 fork 回新会话(可重复恢复,归档条目保留)
 - **删除**:永久删除该会话的磁盘日志(busy 的 agent 先 cancel 并等 idle)
 - **全部删除**:一次批量 RPC + 二次确认;部分失败提示"已删除 X 个,Y 个失败"
+<img width="987" height="837" alt="屏幕截图 2026-08-20 102710" src="https://github.com/user-attachments/assets/3ea2b7a0-9507-45c5-a236-4c4dae9a88da" />
 
 ### 推理与行动折叠条
 - 每个 prompt 回合获得独立的「推理与行动」折叠条:该回合的思考(Think)、中间叙述、上下文注入与全部工具调用整段收起/展开;**最终结论与统计行永不折叠**
 - 回合运行中显示"运行中…"并保持展开;回合结束且视图跟随到底部时自动收起;手动点击随时覆盖
 - 无结论回合(如以报错工具调用收尾)不折叠——错误保持可见;加载的历史回合保持展开
 - 纯 CSS/DOM 注入:只依赖官方渲染器发布的稳定 `data-chat-flow-kind` 边界(user / assistant-step / tool-call / turn-tail),不触碰 React 管理的节点结构
+<img width="887" height="293" alt="image" src="https://github.com/user-attachments/assets/7ffde842-b5a8-41e8-9361-8e7411c669f8" />
 
 ### 工具卡片配色
 - 会话里每个工具调用(pwsh/bash、edit/write、read、grep/glob、web、run_code)展开后的内容卡片按工具类型着色:**bash 终端卡恒为黑底**(亮色主题下也保持)、**pwsh 终端卡为 PowerShell 窗口同款蓝**、其余工具为与主题协调的浅色调(edit 绿 / read 紫 / 搜索蓝 / web 青 / 代码琥珀)
 - 纯 CSS 注入:只用官方渲染器已发布的稳定 `data-*` 钩子(`data-tool`、`data-terminal`、`data-diff` 等),不依赖哈希类名,React 重渲染自动生效
+<img width="1025" height="655" alt="image" src="https://github.com/user-attachments/assets/6aac899b-d6c7-449b-83b8-a4b904b5c932" />
 
 ### 自更新
 - 任意会话执行 `/update`:一键完成 `git pull --ff-only` → `pnpm install` → `pnpm run build`(分步超时保护;已是最新则跳过安装构建),重启 dsh 生效
 - 无后台自动更新,永远由用户显式发起;`--ff-only` 绝不改写本地提交
+<img width="1058" height="225" alt="image" src="https://github.com/user-attachments/assets/66ee5ddc-6d84-4caf-acd6-fa42900d4658" />
 
 ### 性能与可靠性
-- 7,400+ 文件工作区实测:**回滚 / 撤回各约 1 秒**(优化前感知 30–40s)
+- 7,400+ 文件工作区实测:**回滚 / 撤回各约 500ms**
 - 关键优化:单次 `diff-tree` 路径限定 restore、`untrackedCache` + `splitIndex`、fork ∥ restore 并行、stat 预热 + 下一代 prearm
 - Windows 原子写入:`EPERM` / `EBUSY` / `EACCES` rename 退避重试 + 临时文件自动清理
 
