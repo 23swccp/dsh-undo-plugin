@@ -1,0 +1,34 @@
+/*
+ * Foreign rollback-button chrome — the dsh message icon-action recipe
+ * (28px round icon button, tertiary label, hover surface), matching
+ * MessageIconActions' action class so the button reads as native chrome.
+ * Hashed classes are fine here: this is OUR node; React never sees it.
+ */
+
+.action {
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 28px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+}
+
+.action:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-secondary);
+}
+
+.action:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.action svg {
+  display: block;
+}

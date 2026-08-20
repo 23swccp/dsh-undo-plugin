@@ -663,3 +663,51 @@ Think 思考行 rc.7 确实渲染(Sxvs8a_root)。
 - 新增脚本:`scripts/edge-verify.mjs`(折叠条+配色+自动收起)、
   `scripts/edge-verify-archive.mjs`(回滚→按钮样式→撤回);一次性诊断
   脚本已清理。
+
+## 2026-08-20 会话:消息操作行回滚按钮(client-rollback-button 扩展)
+
+用户报告:「之前设置的 message actions 消息操作按钮:回滚又消失了」,
+要求恢复并采用与回车键一致的图标。
+
+**消失原因**:消息级回滚按钮(合格用户消息 Copy 旁)是主树
+`ui-conversation-undo` 的实现,主树源码删除切到 npm rc.7 后自然消失;
+插件侧从未有过(rc.7 **没有用户消息级 slot**——MessageIconActions 的
+extraActions 只在 turn-tail 暴露 `conversation.chat.assistant-actions`,
+UserMessageNodeView 不传)。插件此前用会话头部按钮替代。
+
+**实现(messageActionsPatch.ts,DOM 补丁,navIconPatch 模式)**:
+- **精确匹配**:rc.7 聊天流每节点发布 `data-chat-flow-kind` +
+  `data-chat-flow-key`,用户消息 key 的 `input-message<uuid>` 尾部**就是
+  durable message id**(conversation assembler `match: id:
+  String(event.data.id)` = journal `messageId: message.id`,实测两轮 live
+  发消息验证一致)。`key.endsWith(controller.view.value.messageId)` 唯一
+  命中回滚点指向的消息——按钮只在那条消息的操作行,随回滚点移动。
+- **按钮形态**:操作行末尾(复制按钮后)的外来 icon button,28px 圆形
+  (MessageIconActions 同款 recipe);`MutationObserver(childList)` +
+  sessions list 订阅(current/running)+ controller 视图订阅共同驱动幂等
+  rescan,React 重渲染/虚拟化/会话切换自愈;运行中与 pending 禁用;
+  点击走与头部按钮相同的 undo 流(controller.undo → sessions.open)。
+- **图标(用户要求「与回车键一样」)**:composer 发送键是
+  ui-conversation 的**内联 SVG**(非 primitives 导出;其 IconSendOutline16
+  副本坐标与内联版差第 3-4 位小数)——补丁内联了 composer 的精确路径
+  `M8.3125 0.980183C…`,Edge 实测 `iconMatchesComposer: true`(逐字节
+  相同)。图标纯 DOM 构造,无 React/primitives 依赖。
+- **坑**:① `dataset[dshRollback…]` 写出 kebab-case 属性,选择器若用
+  camelCase 永远匹配不到已有按钮 → 每次扫描重复插入(测试暴露);必须
+  显式 `data-dsh-rollback-message-action` 字面量。② 侧边栏行文本带时效
+  后缀("xx分钟"),按标题 includes 点击会随时间漂移——e2e 用稳定字面量
+  ('4242')定位。
+
+**验证(Edge,服务带 key,真实会话)**:
+- 按钮出现在合格消息操作行(复制后、行末),aria/title 与头部按钮一致,
+  图标路径与 composer 发送键逐字节相同;另一条用户消息无按钮。
+- 点击 → 回滚成功导航 child 会话,「↩ 已回滚…撤回回滚」折叠条出现;
+  撤回 → 恢复导航 restored 会话,消息按钮、头部按钮、trailfold 折叠条
+  全部在位(全功能回归)。
+- 测试 12 文件 61 用例通过(新增 messageActionsPatch 8 例:插入/无点
+  无按钮/运行禁用/随点移动/点击调用/重挂载自愈/销毁清理/图标逐字节契约);
+  typecheck/build 通过;已知环境失败(shadow-git Defender 锁)不变。
+- 新增脚本:`scripts/edge-verify-messageactions.mjs`(完整 e2e)。
+
+**回滚入口现为四个**:消息操作行图标按钮(回车键图标)、会话头部按钮、
+`/undo` 命令、输入框上方撤回折叠条。

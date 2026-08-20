@@ -15,7 +15,8 @@
 ## 具体功能
 
 ### 对话撤销(回滚)
-- **三个入口**:会话头部"回滚"按钮、`/undo` 斜杠命令、输入框上方折叠条
+- **四个入口**:合格用户消息操作行的回滚图标按钮(回车键图标,紧邻"复制")、会话头部"回滚"按钮、`/undo` 斜杠命令、输入框上方折叠条
+- 消息级按钮只出现在当前回滚点指向的那条用户消息上(精确匹配消息 id),随回滚点移动;运行中禁用,DOM 补丁注入、React 重渲染自愈
 - 文件树从私有 Shadow Git 快照恢复;对话 fork 成新会话(seed 是目标消息**之前**的完整事件前缀——模型永远看不到被回滚的提示词、回复与工具调用)
 - 旧会话自动归档并从侧边栏消失,UI 自动切换到新会话
 - 快照在 `agent/pre-step` 捕获;失败会拒绝该步骤(模型不收 prompt),并把原提示词与脱敏原因回填输入框
@@ -96,7 +97,7 @@ git pull && pnpm install && pnpm run build
 ```sh
 pnpm install
 pnpm run typecheck   # 先构建 host 产物(typert 生成),再检查 client 面
-pnpm test            # vitest,11 个文件 / 53 个用例
+pnpm test            # vitest,12 个文件 / 61 个用例
 pnpm run build       # host lib + client bundle(lib/client.js)
 ```
 

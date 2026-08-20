@@ -15,7 +15,8 @@ The plugin ships as an **installable bundle**: a standalone workspace that never
 ## Features
 
 ### Conversation undo (rollback)
-- **Three trigger points**: the session-header rollback button, the `/undo` slash command, and the strip above the composer
+- **Four trigger points**: the rollback icon button in the qualified user message's actions row (the enter-key glyph, right next to Copy), the session-header rollback button, the `/undo` slash command, and the strip above the composer
+- The message-level button appears only on the user message the rollback point currently targets (exact message-id match) and follows the point as it moves; disabled while running, DOM-patch injected, self-healing across React re-renders
 - The file tree is restored from a private Shadow Git snapshot; the conversation is forked into a new Session whose seed is the complete event prefix *before* the target message — the model never sees the reverted prompt, reply, or tool calls
 - The old Session is archived automatically (it leaves the sidebar) and the UI navigates to the child Session
 - Snapshots are captured at `agent/pre-step`; a capture failure rejects the step (the model never receives the prompt) and refills the composer draft with the original prompt plus a redacted reason
@@ -96,7 +97,7 @@ git pull && pnpm install && pnpm run build
 ```sh
 pnpm install
 pnpm run typecheck   # builds host artifacts (typert generation) then checks the client face
-pnpm test            # vitest, 11 files / 53 tests
+pnpm test            # vitest, 12 files / 61 tests
 pnpm run build       # host lib + client bundles (lib/client.js)
 ```
 

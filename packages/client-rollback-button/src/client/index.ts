@@ -12,6 +12,7 @@ import { RollbackHeaderAction } from './RollbackHeaderAction.tsx'
 import type { RollbackActionInjected } from './RollbackHeaderAction.tsx'
 import { RollbackFold } from './RollbackFold.tsx'
 import type { RollbackFoldInjected } from './RollbackFold.tsx'
+import { mountMessageActionsPatch } from './messageActionsPatch.ts'
 
 /** Required service and slot declarations. The Remote namespaces are mounted by this apply, so only the `remote` service is injected. */
 export const inject = ['slots', 'remote', 'sessions']
@@ -25,6 +26,14 @@ interface WorkspacesListPort {
 /** Browser surface of the workspaces runtime service. */
 interface WorkspacesPort {
   list: WorkspacesListPort
+}
+
+/** Browser surface of the sessions runtime list store (current + running rows). */
+interface SessionsListRuntime {
+  list: {
+    getSnapshot(): { current: SessionId | undefined; byId: Readonly<Record<string, { running: boolean }>> }
+    subscribe(fn: () => void): () => void
+  }
 }
 
 /**
@@ -49,7 +58,7 @@ async function mountOnce(
 /** Mount the plugin Remote and register the session-header rollback action. */
 export async function apply(ctx: ClientContext): Promise<() => void> {
   const disposeRemote = await mountOnce(ctx, TYPERT_REMOTE, 'conversationUndo/current')
-  const sessions = ctx.get('sessions') as unknown as Pick<ISessions, 'open'>
+  const sessions = ctx.get('sessions') as unknown as Pick<ISessions, 'open'> & SessionsListRuntime
   const workspaces = ctx.get('workspaces') as WorkspacesPort | undefined
   const undoRemote = ctx.get('remote.conversationUndo') as ConversationUndoRemote
   const controllers = new Map<SessionId, ConversationUndoController>()
@@ -102,7 +111,19 @@ export async function apply(ctx: ClientContext): Promise<() => void> {
     for (const controller of controllers.values()) void controller.refresh()
   })
 
+  // Message-level rollback entry (main-tree parity): the enter-key glyph next
+  // to Copy on the qualified user message's actions row.
+  const disposeMessageActions = mountMessageActionsPatch({
+    list: sessions.list,
+    controllerFor,
+    undo: async (sessionId, messageId) => {
+      const result = await controllerFor(sessionId).undo(messageId)
+      if (result !== undefined) sessions.open(result.sessionId)
+    },
+  })
+
   return () => {
+    disposeMessageActions()
     disposeRegistration()
     disposeFold()
     disposeFollow()
