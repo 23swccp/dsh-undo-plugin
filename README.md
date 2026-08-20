@@ -10,7 +10,6 @@ English | [中文](README.zh.md)
 
 The plugin ships as an **installable bundle**: a standalone workspace that never patches the dsh codebase and uses only the public dsh APIs published on npm (`@deepseek-ai/dsh-*@0.1.0-rc.6`). File rollback goes through a plugin-private Shadow Git snapshot (its own `GIT_DIR`, never your `.git`).
 
-> **Note:** the repository and the packages keep the historical `rollback` name; the user-facing commands are `/undo` (revert) and `/update` (self-update).
 
 ## Features
 
