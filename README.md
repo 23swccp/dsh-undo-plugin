@@ -1,68 +1,69 @@
 # dsh-undo-plugin
 
-English | [中文](README.zh.md)
+中文 | [English](README.en.md)
 
 [![CI](https://github.com/23swccp/dsh-undo/actions/workflows/ci.yml/badge.svg)](https://github.com/23swccp/dsh-undo/actions/workflows/ci.yml)
 
-## Overview
+## 大致介绍
 
-[dsh-undo-plugin](https://github.com/23swccp/dsh-undo) is a conversation-undo plugin for [DeepSeek Harness (dsh)](https://github.com/deepseek-ai/deepseek-harness): a single `/undo` rolls the **workspace files and the conversation together** back to before the latest completed message; rolled-back sessions land in "Settings → Archive Tasks" for management (view / restore / permanent delete / delete all). Made a mistake? The "revoke rollback" strip above the composer fully restores it.
+[dsh-undo-plugin](https://github.com/23swccp/dsh-undo) 是 [DeepSeek Harness (dsh)](https://github.com/deepseek-ai/deepseek-harness) 的对话撤销插件:一句 `/undo` 就能把**工作区文件和对话一起**退回到最近一条已完成消息之前;被回滚的会话进入"设置 → 归档任务"统一管理(查看 / 恢复 / 永久删除 / 全部删除)。回滚错了也不要紧——输入框上方的"撤回回滚"折叠条可以完整恢复。
 
-The plugin ships as an **installable bundle**: a standalone workspace that never patches the dsh codebase and uses only the public dsh APIs published on npm (`@deepseek-ai/dsh-*@0.1.0-rc.6`). File rollback goes through a plugin-private Shadow Git snapshot (its own `GIT_DIR`, never your `.git`).
+插件以**可安装 bundle** 形式交付:独立工作区、不打补丁、不修改 dsh 本体,只使用 npm 上发布的 dsh 公开 API(`@deepseek-ai/dsh-*@0.1.0-rc.6`)。文件回滚走插件私有的 Shadow Git 快照(独立 `GIT_DIR`,绝不碰你的 `.git`)。
 
 
-## Features
 
-### Conversation undo (rollback)
-- **Four trigger points**: the rollback icon button in the qualified user message's actions row (the enter-key glyph, right next to Copy), the session-header rollback button, the `/undo` slash command, and the strip above the composer
-- The message-level button appears only on the user message the rollback point currently targets (exact message-id match) and follows the point as it moves; disabled while running, DOM-patch injected, self-healing across React re-renders
-- The file tree is restored from a private Shadow Git snapshot; the conversation is forked into a new Session whose seed is the complete event prefix *before* the target message — the model never sees the reverted prompt, reply, or tool calls
-- The old Session is archived automatically (it leaves the sidebar) and the UI navigates to the child Session
-- Snapshots are captured at `agent/pre-step`; a capture failure rejects the step (the model never receives the prompt) and refills the composer draft with the original prompt plus a redacted reason
-<img width="1114" height="682" alt="Conversation with the rollback entry points" src="https://github.com/user-attachments/assets/f27676a4-b844-491c-9686-668bb4a55d7c" />
+## 具体功能
 
-### Revoke rollback
-- The `↩ 已回滚 <preview> [撤回回滚]` strip appears only after a rollback and disappears once a new prompt is accepted
-- A full reverse transaction: it first verifies the workspace is untouched (a diverged workspace is refused with `workspace-diverged`, never overwritten), then restores the source Session and files, and re-arms the rollback point — rollback and revoke are symmetric and repeatable
-- `restoring` / `revoking` journal phases are recovered deterministically on startup
-<img width="1220" height="387" alt="The revoke-rollback strip above the composer" src="https://github.com/user-attachments/assets/faf026a0-97d0-4f56-82a2-acbae0a09e1e" />
+### 对话撤销(回滚)
+- **四个入口**:合格用户消息操作行的回滚图标按钮(回车键图标,紧邻"复制")、会话头部"回滚"按钮、`/undo` 斜杠命令、输入框上方折叠条
+- 消息级按钮只出现在当前回滚点指向的那条用户消息上(精确匹配消息 id),随回滚点移动;运行中禁用,DOM 补丁注入、React 重渲染自愈
+- 文件树从私有 Shadow Git 快照恢复;对话 fork 成新会话(seed 是目标消息**之前**的完整事件前缀——模型永远看不到被回滚的提示词、回复与工具调用)
+- 旧会话自动归档并从侧边栏消失,UI 自动切换到新会话
+- 快照在 `agent/pre-step` 捕获;失败会拒绝该步骤(模型不收 prompt),并把原提示词与脱敏原因回填输入框
+<img width="1114" height="682" alt="屏幕截图 2026-08-20 102749" src="https://github.com/user-attachments/assets/f27676a4-b844-491c-9686-668bb4a55d7c" />
 
-### Archive tasks (Settings → Archive Tasks)
-- Lists every archived Session (title / archived time / created time / workspace) with a read-only transcript viewer
-- **Restore**: fork an archived conversation back as a new Session (repeatable; the archive entry is kept)
-- **Delete**: permanently removes the session's on-disk log directory; busy agents are cancelled and awaited idle first
-- **Delete all**: one batch RPC with a double-confirm dialog; partial failures report "deleted X, Y failed"
-<img width="987" height="837" alt="Archive tasks settings page" src="https://github.com/user-attachments/assets/3ea2b7a0-9507-45c5-a236-4c4dae9a88da" />
+### 撤回回滚
+- 仅在回滚后出现 `↩ 已回滚 <预览> [撤回回滚]` 折叠条,新 prompt 接纳后自动消失
+- 完整反向事务:先校验工作区未被改动(已分叉则拒绝 `workspace-diverged`,不覆盖你的修改)→ 恢复源会话与文件 → 重新武装回滚点;回滚与撤回对称、可重复
+- `restoring` / `revoking` 相位 journal 在启动时按磁盘证据确定性恢复
+<img width="1220" height="387" alt="屏幕截图 2026-08-20 102819" src="https://github.com/user-attachments/assets/faf026a0-97d0-4f56-82a2-acbae0a09e1e" />
 
-### Reasoning-and-actions fold
-- Every prompt turn gets its own "reasoning & actions" collapse bar: the turn's Think steps, intermediate narration, context injections, and all tool calls fold away together; **the final conclusion and the stats row never fold**
-- A running turn shows a "running" hint and stays expanded; once it closes while the view is following at the bottom it auto-collapses; manual clicks always override
-- Turns without a conclusion (e.g. ending on a failing tool call) never fold — errors stay visible; history loads expanded
-- Pure CSS/DOM injection keyed on the renderer's stable `data-chat-flow-kind` boundaries (user / assistant-step / tool-call / turn-tail); React-owned node structure is never touched
-<img width="887" height="293" alt="The per-turn reasoning-and-actions fold bar" src="https://github.com/user-attachments/assets/7ffde842-b5a8-41e8-9361-8e7411c669f8" />
+### 归档任务(设置 → 归档任务)
+- 列出全部归档会话(标题 / 归档时间 / 创建时间 / 工作区),支持只读查看
+- **恢复**:把归档对话 fork 回新会话(可重复恢复,归档条目保留)
+- **删除**:永久删除该会话的磁盘日志(busy 的 agent 先 cancel 并等 idle)
+- **全部删除**:一次批量 RPC + 二次确认;部分失败提示"已删除 X 个,Y 个失败"
+<img width="987" height="837" alt="屏幕截图 2026-08-20 102710" src="https://github.com/user-attachments/assets/3ea2b7a0-9507-45c5-a236-4c4dae9a88da" />
 
-### Tool card colors
-- Every expanded tool-call card in a conversation is tinted by tool type: the **bash terminal card stays near-black** (kept dark even under the light theme), the **pwsh terminal card gets the PowerShell-window blue**, and the rest carry theme-coordinated tints (edit green / read violet / search blue / web teal / code amber)
-- Pure CSS injection keyed on the stable `data-*` hooks the stock renderer already publishes (`data-tool`, `data-terminal`, `data-diff`, …) — no hashed class names, React re-renders re-apply automatically
-<img width="1025" height="655" alt="Tool-call cards colored per tool type" src="https://github.com/user-attachments/assets/6aac899b-d6c7-449b-83b8-a4b904b5c932" />
+### 推理与行动折叠条
+- 每个 prompt 回合获得独立的「推理与行动」折叠条:该回合的思考(Think)、中间叙述、上下文注入与全部工具调用整段收起/展开;**最终结论与统计行永不折叠**
+- 回合运行中显示"运行中…"并保持展开;回合结束且视图跟随到底部时自动收起;手动点击随时覆盖
+- 无结论回合(如以报错工具调用收尾)不折叠——错误保持可见;加载的历史回合保持展开
+- 纯 CSS/DOM 注入:只依赖官方渲染器发布的稳定 `data-chat-flow-kind` 边界(user / assistant-step / tool-call / turn-tail),不触碰 React 管理的节点结构
+<img width="887" height="293" alt="image" src="https://github.com/user-attachments/assets/7ffde842-b5a8-41e8-9361-8e7411c669f8" />
 
-### Self-update
-- `/update` in any session runs `git pull --ff-only` → `pnpm install` → `pnpm run build` in one pass (per-step timeouts; skips install/build when already up to date); restart dsh to activate
-- No background auto-update — updating always starts from an explicit user action; `--ff-only` never rewrites local commits
-<img width="1058" height="225" alt="The /update command output" src="https://github.com/user-attachments/assets/66ee5ddc-6d84-4caf-acd6-fa42900d4658" />
+### 工具卡片配色
+- 会话里每个工具调用(pwsh/bash、edit/write、read、grep/glob、web、run_code)展开后的内容卡片按工具类型着色:**bash 终端卡恒为黑底**(亮色主题下也保持)、**pwsh 终端卡为 PowerShell 窗口同款蓝**、其余工具为与主题协调的浅色调(edit 绿 / read 紫 / 搜索蓝 / web 青 / 代码琥珀)
+- 纯 CSS 注入:只用官方渲染器已发布的稳定 `data-*` 钩子(`data-tool`、`data-terminal`、`data-diff` 等),不依赖哈希类名,React 重渲染自动生效
+<img width="1025" height="655" alt="image" src="https://github.com/user-attachments/assets/6aac899b-d6c7-449b-83b8-a4b904b5c932" />
 
-### Performance and reliability
-- Measured on a ~7,400-file workspace: **rollback and revoke each complete in about 500 ms** (previously 30–40 s perceived)
-- Key optimizations: single-`diff-tree` path-limited restore, `untrackedCache` + `splitIndex`, fork ∥ restore parallelism, stat warm-up plus next-generation prearm
-- Windows-friendly atomic writes: `EPERM` / `EBUSY` / `EACCES` renames retried with backoff; failed temp files are cleaned up
+### 自更新
+- 任意会话执行 `/update`:一键完成 `git pull --ff-only` → `pnpm install` → `pnpm run build`(分步超时保护;已是最新则跳过安装构建),重启 dsh 生效
+- 无后台自动更新,永远由用户显式发起;`--ff-only` 绝不改写本地提交
+<img width="1058" height="225" alt="image" src="https://github.com/user-attachments/assets/66ee5ddc-6d84-4caf-acd6-fa42900d4658" />
 
-## Installation
+### 性能与可靠性
+- 7,400+ 文件工作区实测:**回滚 / 撤回各约 500ms**
+- 关键优化:单次 `diff-tree` 路径限定 restore、`untrackedCache` + `splitIndex`、fork ∥ restore 并行、stat 预热 + 下一代 prearm
+- Windows 原子写入:`EPERM` / `EBUSY` / `EACCES` rename 退避重试 + 临时文件自动清理
 
-### Prerequisites
-- Node.js (`^22.19 || >=24`) and dsh `0.1.0-rc.6` / `0.1.0-rc.7`
-- The browser half needs the `dsh-web-app` surface (the web profile provides it by default; headless profiles may drop the four `client-rollback-*` rows from the bundle patch)
+## 安装办法
 
-### Install
+### 前置条件
+- Node.js(`^22.19 || >=24`)与 dsh `0.1.0-rc.6` / `0.1.0-rc.7`
+- 浏览器界面需要 `dsh-web-app` 表面(web profile 默认满足;headless profile 可删去 patch 里四行 `client-rollback-*`)
+
+### 安装
 ```sh
 git clone https://github.com/23swccp/dsh-undo.git
 cd dsh-undo
@@ -71,53 +72,53 @@ pnpm run build
 dsh plugin --profile web add ./packages/rollback-fork ./packages/rollback-archive ./packages/rollback-undo ./packages/client-rollback-button ./packages/client-rollback-settings ./packages/client-rollback-toolcards ./packages/client-rollback-trailfold ./packages/bundle-rollback
 ```
 
-All eight packages must be linked: pnpm's `link:` protocol does not install a linked bundle's dependencies, and the dsh loader resolves plugin package names from the profile's `node_modules`, so the seven plugin packages need their own links next to the bundle.
+八个包都要 link:pnpm 的 `link:` 协议不会安装被链接 bundle 的依赖,而 dsh 加载器从 profile 的 `node_modules` 解析插件包名,因此七个插件包需要与 bundle 一起各自 link。
 
-After restarting dsh: the session header gains the rollback button, `/undo` rolls back directly, the Settings dialog gains the Archive Tasks page, every turn gains the reasoning-and-actions fold bar, and expanded tool-call cards are colored per tool type.
+重启 dsh 后:会话头部出现"回滚"按钮,输入 `/undo` 可直接回滚;设置里出现"归档任务"页;每回合出现「推理与行动」折叠条;工具调用展开卡片按工具类型着色。
 
-### Update
-Run `/update` in any session (requires a git-clone install), then restart dsh. Manual equivalent:
+### 更新
+在任意会话执行 `/update`(要求以 git clone 方式安装),完成后重启 dsh。手动等价:
 
 ```sh
 git pull && pnpm install && pnpm run build
 ```
 
 
-## Package layout
+## 包结构
 
-| Package | Role |
+| 包 | 职责 |
 |---|---|
-| `packages/rollback-fork` | Session fork capability: exact completed-turn / before-user-message Agent branches |
-| `packages/rollback-archive` | Archive capability: list, read-only view, restore, permanent delete, delete-all |
-| `packages/rollback-undo` | Shadow-Git journal + rollback/revoke orchestration + the `/undo` and `/update` commands |
-| `packages/client-rollback-button` | Browser: session-header rollback action and the revoke strip (self-mounted Remotes) |
-| `packages/client-rollback-settings` | Browser: Archive Tasks settings page (self-mounted Remotes) |
-| `packages/client-rollback-toolcards` | Browser: per-tool-type colors for expanded tool-call cards (CSS-only injection) |
-| `packages/client-rollback-trailfold` | Browser: per-turn reasoning-and-actions fold bar (DOM injection) |
-| `packages/bundle-rollback` | Installable bundle: `cordis.patch.yml` + dependency manifest |
-| `packages/typert-protocol` | Vendored `@deepseek-ai/dsh-typert-protocol` source (required by the typert generator, see below) |
+| `packages/rollback-fork` | Session fork 能力:completed-turn / before-user-message 精确切分 |
+| `packages/rollback-archive` | 归档能力:列表、只读查看、恢复、永久删除、全部删除 |
+| `packages/rollback-undo` | Shadow Git journal + 回滚/撤回编排 + `/undo`、`/update` 命令 |
+| `packages/client-rollback-button` | 浏览器:会话头部回滚按钮与撤回折叠条(自 mount Remote) |
+| `packages/client-rollback-settings` | 浏览器:归档任务设置页(自 mount Remote) |
+| `packages/client-rollback-toolcards` | 浏览器:工具卡片按工具类型着色(纯 CSS 注入) |
+| `packages/client-rollback-trailfold` | 浏览器:每回合「推理与行动」折叠条(DOM 注入) |
+| `packages/bundle-rollback` | 可安装 bundle:`cordis.patch.yml` + 依赖清单 |
+| `packages/typert-protocol` | vendor 的 `@deepseek-ai/dsh-typert-protocol` 源码(typert 生成需要) |
 
-## Development
+## 开发
 
 ```sh
 pnpm install
-pnpm run typecheck   # builds host artifacts (typert generation) then checks the client face
-pnpm test            # vitest, 12 files / 65 tests
-pnpm run build       # host lib + client bundles (lib/client.js)
+pnpm run typecheck   # 先构建 host 产物(typert 生成),再检查 client 面
+pnpm test            # vitest,12 个文件 / 65 个用例
+pnpm run build       # host lib + client bundle(lib/client.js)
 ```
 
-### Why the vendored typert-protocol and the generator patch
+### 为什么 vendor typert-protocol 并打生成器补丁
 
-The typert generator recognizes `Remote` / `TypertRemoteService` only when the declaring package is workspace-registered, and it maps export targets back to `src/`. Against npm-resolved dsh packages two things were required:
+typert 生成器只在声明包是 workspace 注册包时识别 `Remote` / `TypertRemoteService`,并把导出目标映射回 `src/`。对 npm 解析的 dsh 包需要两件事:
 
-1. `packages/typert-protocol` vendors the protocol source; `pnpm-workspace.yaml` overrides every dsh package to resolve it (`workspace:^`), and `tsconfig.base.json` maps `@deepseek-ai/dsh-typert-protocol` to `src/`.
-2. `patches/typert-generator-workspace-only.patch` (applied via `patchedDependencies`) restricts typert map/context collection to workspace-registered files — otherwise npm-resolved dsh twins (e.g. two `dsh-session` instances from circular peers) duplicate the map declarations and fail generation.
+1. `packages/typert-protocol` vendor 协议源码;`pnpm-workspace.yaml` 用 overrides 让所有 dsh 包解析到它(`workspace:^`);`tsconfig.base.json` 把 `@deepseek-ai/dsh-typert-protocol` 映射到 `src/`。
+2. `patches/typert-generator-workspace-only.patch`(经 `patchedDependencies` 应用)把 typert map/context 收集限制在 workspace 注册文件内——否则 npm 解析的 dsh 双胞胎实例(如循环 peer 产生的两份 `dsh-session`)会重复声明 map,导致生成失败。
 
-## Limitations
+## 限制
 
-- Rollback restores files inside the session workspace only (the git worktree boundary); agent writes outside the workspace are not covered.
-- Steer-message exclusion is best-effort: the durable side has no `delivery` field in rc.6, so the source-kind + text-content check is the boundary.
-- Admission failures are surfaced by polling once when the turn stops (the rc.6 api-remotes allowlist cannot forward push events).
+- 回滚只恢复会话工作区(git worktree 边界)内的文件;工作区外的 agent 写入不在覆盖范围。
+- steer 消息排除是尽力而为:rc.6 的 durable 侧没有 `delivery` 字段,以 source-kind + 纯文本检查为边界。
+- 接纳失败在回合停止时轮询一次得知(rc.6 的 api-remotes allowlist 无法转发推送事件)。
 
 ## License
 
