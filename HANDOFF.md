@@ -789,12 +789,27 @@ files 无越界、入口包 deps 全部 `@dsh-undo/*`。
 `add` 本地 8 路径;bundles 列表变为 `dsh-undo-plugin`;重启
 dsh web(3080)后 `/plugins/@dsh-undo/*/client.js` 200、旧名 404。
 
-**发布操作(用户执行,尚未做)**:
-1. npmjs.com 注册账号 + 创建免费组织 `dsh-undo` + `npm login`;
-2. 依序发布(被依赖者先行):`rollback-fork` → `rollback-archive` →
-   `rollback-undo` → 4 个 `client-rollback-*` → `dsh-undo-plugin`,
-   命令 `pnpm --filter <包名> publish --access public`(根目录);
-3. 发布后 marketplace(`dshmarket`)搜索 `dsh-undo-plugin` 验证
-   一键安装;向 awesome-dsh-plugin 仓库提 PR(需 English 描述 +
-   `dsh plugin add dsh-undo-plugin` 可复现)。
+**发布操作(2026-08-20 已完成)**:
+1. npmjs.com 注册账号 + 创建免费组织 `dsh-undo` + `npm login` ✓
+   (账号 23swccp37,2FA auth-and-writes 模式)。
+2. **发布方式**:`pnpm publish` 走不通——账号开了 2FA 且 token 无
+   bypass 时报 `ERR_PNPM_OTP_NON_INTERACTIVE`;改用 **granular
+   access token(勾选 bypass 2FA)+ `npm publish <tarball>`**:
+   - token 放临时 npmrc(`--userconfig` 指定),避免用户 `.npmrc`
+     里 `npm login` 会话 token(无 bypass)抢优先级——这是首个
+     403/EOTP 的真因;
+   - 预发布版本必须 `--tag latest` 显式指定,否则 `dsh plugin add`
+     默认解析 latest 会 404;
+   - pnpm pack 的 tarball 直接 `npm publish` 发布,8 包全部成功:
+     `rollback-fork` → `rollback-archive` → `rollback-undo` →
+     4 个 `client-rollback-*` → `dsh-undo-plugin`,全部
+     `0.1.0-rc.6`,`latest` dist-tag,public。
+3. **新包 CDN 负缓存**:发布后匿名 `npm view` 对 scoped 包 404 约
+   2~5 分钟(认证查询正常、`npm access get status` 显示 public);
+   等待后恢复——不是发布失败。
+4. **端到端验证**:临时目录 `npm install dsh-undo-plugin` 成功,
+   8 个包 + `cordis.patch.yml` + `lib/client.js` 全部就位 ✓。
+5. 待做:向 awesome-dsh-plugin 仓库提 PR(English 描述 +
+   `dsh plugin add dsh-undo-plugin` 可复现);国内 npmmirror 同步
+   有延迟,用户 `dsh plugin add` 走镜像时需等同步完成。
 
