@@ -711,3 +711,45 @@ UserMessageNodeView 不传)。插件此前用会话头部按钮替代。
 
 **回滚入口现为四个**:消息操作行图标按钮(回车键图标)、会话头部按钮、
 `/undo` 命令、输入框上方撤回折叠条。
+
+## 2026-08-20 会话:回滚/撤回回滚变慢排查(根因:机器级进程创建开销,非代码)
+
+用户报告:回滚与撤回回滚速度变慢,"之前优化过,现在又回到原来了"。
+
+**排查过程(先证伪代码回归,再实测定位)**:
+1. 优化代码齐全:`src` 与 `lib`(statWarmer/prearm/untrackedCache/
+   splitIndex/路径限定 restore/diff-tree)全部在位,lib mtime 新——代码
+   无回归。
+2. 计时 e2e(100ms 轮询):回滚 4359ms、撤回 4138ms(此前最优 1169/653)。
+3. 相位分解:live 会话工作区是 `Desktop\对话`(**仅 6 个跟踪文件**),
+   却连 `git ls-files` 都要 1790ms——问题不在仓库大小,在**每次 git
+   spawn 本身**。
+4. spawn 隔离实验:`git --version` ~1.5-2s、`node -e ""` ~1s、
+   `cmd /c echo` ~1s(PowerShell 原生同样慢)→ **机器级进程创建开销**,
+   每进程 +0.5~1.5s。回滚一次 ~6 个 git spawn ≈ 4s,与实测吻合。
+5. 系统排查:CPU 仅 18%;SecurityCenter2 注册了 Kaspersky+Defender+
+   McAfee 三家(Defender 已被禁用,0x800106ba);发现可疑进程
+   **DocUpdate(隐藏路径、svchost 拉起、累计 CPU 4600+ 秒)**。
+6. **A/B 实验**:`Stop-Process DocUpdate` 后 `git --version` 1500ms→
+   **48ms**(30 倍),`node -e` → 53ms——**真凶就是 DocUpdate**,不是
+   Kaspersky。
+
+**根因**:迅读PDF(`C:\Program Files (x86)\MasterPDF\`)的
+`DocUpdate.exe` 干扰全机进程创建;其自启服务 `DocService`(Auto,
+Running)负责拉起。2026-08-19 起的「4 个 shadow-git/update 测试稳定
+超时 30s + EBUSY」同根因(此前记为 Defender 锁,实际是它)。
+
+**处置**:
+- 已杀 DocUpdate 进程(未复活);停/禁 DocService 服务需管理员权限,
+  当前 shell 无权(拒绝访问)——**用户需手动**(管理员 PowerShell:
+  `Stop-Service DocService; Set-Service DocService -StartupType Disabled`,
+  或直接用其 Uninstall.exe 卸载迅读PDF;Defender 处于禁用状态也建议
+  重新开启排查)。
+- 杀掉后实测:**回滚 430ms、撤回 332ms、再回滚 432ms、再撤回 344ms**
+  (超过历史最优);全量测试 **12 文件 65 用例全部通过**(此前 4 例
+  "环境失败"消失)。
+
+**工具沉淀**:`scripts/edge-timing.mjs`(回滚/撤回计时 e2e)、
+`scripts/timing-spawn.mjs`(机器健康检查:spawn 是否又变慢)。
+**经验**:机器整体变慢(git/测试/e2e 同时劣化)时,先测
+`timing-spawn.mjs` 排除第三方进程干扰,再怀疑代码。

@@ -97,7 +97,7 @@ git pull && pnpm install && pnpm run build
 ```sh
 pnpm install
 pnpm run typecheck   # builds host artifacts (typert generation) then checks the client face
-pnpm test            # vitest, 12 files / 61 tests
+pnpm test            # vitest, 12 files / 65 tests
 pnpm run build       # host lib + client bundles (lib/client.js)
 ```
 

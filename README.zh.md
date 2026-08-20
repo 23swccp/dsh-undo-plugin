@@ -97,7 +97,7 @@ git pull && pnpm install && pnpm run build
 ```sh
 pnpm install
 pnpm run typecheck   # 先构建 host 产物(typert 生成),再检查 client 面
-pnpm test            # vitest,12 个文件 / 61 个用例
+pnpm test            # vitest,12 个文件 / 65 个用例
 pnpm run build       # host lib + client bundle(lib/client.js)
 ```
 
