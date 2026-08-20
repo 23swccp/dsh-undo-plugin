@@ -21,6 +21,8 @@
 - 旧会话自动归档并从侧边栏消失,UI 自动切换到新会话
 - 快照在 `agent/pre-step` 捕获;失败会拒绝该步骤(模型不收 prompt),并把原提示词与脱敏原因回填输入框
 <img width="1114" height="682" alt="屏幕截图 2026-08-20 102749" src="https://github.com/user-attachments/assets/f27676a4-b844-491c-9686-668bb4a55d7c" />
+也可直接点击发送出去的prompt下方"回滚"图标执行回滚
+<img width="713" height="309" alt="image" src="https://github.com/user-attachments/assets/80c348a2-fc42-4530-9b39-2b73e1039a8c" />
 
 ### 撤回回滚
 - 仅在回滚后出现 `↩ 已回滚 <预览> [撤回回滚]` 折叠条,新 prompt 接纳后自动消失
